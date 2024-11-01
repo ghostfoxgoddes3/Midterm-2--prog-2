@@ -10,7 +10,7 @@
 - Daniel Couto Pereira
 - Davi Boechat Nunes
 - Fernanda Alexandre Mancini
-- Gabreily Di Folco Rocha
+- Gabriely Di Folco Rocha
 - Laura Fernandes Pires
 - Leandro Vieira Peixoto
 - Lucía Victoria Gutierrez Velazquez

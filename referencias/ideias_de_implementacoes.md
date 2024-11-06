@@ -27,4 +27,5 @@
 ## Pontos de Incêndio Mais Intenso
 - Algumas células podem ter um "hotspot", onde o fogo queima de forma mais intensa e se espalha com mais rapidez.
 
-
+## Probabilidade de Sobrevivência de uma Árvore
+- Com base nas condições iniciais e nos parâmetros de propagação do fogo, estimar a probabilidade de uma árvore sobreviver ao incêndio.

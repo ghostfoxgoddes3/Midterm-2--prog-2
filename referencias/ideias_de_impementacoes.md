@@ -21,6 +21,10 @@
 - Alerta de Evacuação.
 - Estratégia pros Bombeiros.
 
+## Vento 
+-se a direção do vento é de cima ou de baixo o fogo se propaga mais rápido nessa direção 
+
+## 
 
 
 

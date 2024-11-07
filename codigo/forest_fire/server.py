@@ -1,6 +1,6 @@
 import mesa
 
-from .model import ForestFire
+from model import ForestFire
 
 COLORS = {"Fine": "#00AA00", "On Fire": "#880000", "Burned Out": "#000000"}
 

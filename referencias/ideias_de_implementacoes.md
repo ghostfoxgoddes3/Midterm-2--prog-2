@@ -4,6 +4,9 @@
 - **Terrestres**: Apaga só uma árvore por vez.
 - **Helicóptero**: Apaga uma árvore e todos os seus vizinhos.
 
+Sugestão: ## **Aplicação de retardantes de queima**
+- Profissionais podem aplicar algum tipo de químico que dificulte o processo de queima.
+
 ## Incendiário
 - Acende uma árvore por vez (aleatória), pois é uma ação clandestina e não deixa rastros. Não pode ir numa área pegando fogo.
 

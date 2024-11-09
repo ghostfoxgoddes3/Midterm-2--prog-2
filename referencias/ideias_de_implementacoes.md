@@ -32,3 +32,7 @@ Sugestão: ## **Aplicação de retardantes de queima**
 
 ## Probabilidade de Sobrevivência de uma Árvore
 - Com base nas condições iniciais e nos parâmetros de propagação do fogo, estimar a probabilidade de uma árvore sobreviver ao incêndio.
+
+## Fábricas 🏭
+- Criação de fábricas que podem acelerar a propagação do fogo nas regiões próximas devido à alta combustibilidade ou a presença de produtos químicos inflamáveis.
+     - ☣️ Possibilidade de criar uma nova condição as árvores: **Toxic** que se espalharia de forma similar ao fogo.

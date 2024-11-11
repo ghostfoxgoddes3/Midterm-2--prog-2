@@ -1,0 +1,16 @@
+#import random
+#import mesa
+from agent import TreeCell
+from model import ForestFire
+
+def chuva(p_chuva=0.3,p_apagar=0.30): #codigo nao completo. isso é so um rascunho do rascunho
+    for (x, y) in ForestFire.grid.coord_iter():
+        if ForestFire.random.random() < p_chuva:
+            if ForestFire.random.random()<p_apagar:
+                TreeCell((x, y)).condition=='Fine'
+                TreeCell((x+1, y)).condition=='Fine'
+                TreeCell((x, y+1)).condition=='Fine'
+                TreeCell((x-1, y)).condition=='Fine'
+                for neighbor in self.model.grid.iter_neighbors(self.pos, True):#preciso fazer com que chuva não se "espalhe"
+                    if neighbor.condition == "On Fire":
+                        neighbor.condition = "Fine"

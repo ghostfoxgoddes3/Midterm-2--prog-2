@@ -1,17 +1,28 @@
 import mesa
 from model import ForestFire
 
-COLORS = {"Fine": "#46951e", "On Fire": "#FF6666", "Burned Out": "#4d305f"}
-
+# Emojis e cores personalizadas para os diferentes estados das árvores
+EMOJIS = {"Fine": "v", "On Fire": "🔥", "Burned Out": "♥"}
+COLORS = {"Fine": "#66FF66", "On Fire": "#FF6666", "Burned Out": "#999999"}
 
 def forest_fire_portrayal(tree):
     if tree is None:
         return
-    portrayal = {"Shape": "rect", "w": 1, "h": 1, "Filled": "true", "Layer": 0}
+    
+    # Configuração do portrayal para incluir emojis e cores
+    portrayal = {
+        "Shape": "rect",  # Forma como retângulo para permitir a cor de fundo
+        "Filled": "true",
+        "Layer": 0,
+        "Color": COLORS[tree.condition],  # Cor de fundo personalizada para o estado
+        "text": EMOJIS[tree.condition],  # Emoji para ilustrar o estado
+        "text_color": "black",  # Cor do emoji para contraste
+        "w": 1,  # Largura da célula
+        "h": 1,  # Altura da célula
+    }
     (x, y) = tree.pos
     portrayal["x"] = x
     portrayal["y"] = y
-    portrayal["Color"] = COLORS[tree.condition]
     return portrayal
 
 # Definindo o Canvas para a visualização do modelo

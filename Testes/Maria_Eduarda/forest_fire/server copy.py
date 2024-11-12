@@ -1,33 +1,21 @@
 import mesa
 from model import ForestFire
+#Servidor para visualização dos agentes como bolinhas
 
-# Emojis e cores personalizadas para os diferentes estados das árvores
+# Cores personalizadas para os diferentes estados das árvores
 COLORS = {"Fine": "#66FF66", "On Fire": "#FF6666", "Burned Out": "#999999"}
-TEXT_COLOR = {"Fine": "#66FF66", "On Fire": "#FF6666", "Burned Out": "#999999"}
-text = ""
-shape = "rect"
 
 def forest_fire_portrayal(tree):
     if tree is None:
         return
-    if tree.condition == "Fine":
-        text = "v"
-    elif tree.condition == "On Fire":
-        text = "🔥"
-    elif tree.condition == "Burned Out":
-        text = "♥"
-        #shape = "circle"
     
-
+    # Configuração do portrayal para incluir bolinhas e cores
     portrayal = {
-        "Shape": shape,  
+        "Shape": "circle",  # Forma como círculo para representar as árvores
         "Filled": "true",
         "Layer": 0,
         "Color": COLORS[tree.condition],  # Cor de fundo personalizada para o estado
-        "text": text,  # Emoji para ilustrar o estado
-        "text_color": TEXT_COLOR[tree.condition],  # Cor do emoji para contraste
-        "w": 1,  # Largura da célula
-        "h": 1,  # Altura da célula
+        "r": 1,  # Raio da bolinha
     }
     (x, y) = tree.pos
     portrayal["x"] = x

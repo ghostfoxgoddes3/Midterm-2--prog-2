@@ -1,4 +1,5 @@
 # Updates
+- Aqui serão incluídos apenas os updates essenciais feitos, no código, por mim.
 
 ## Update 1 - prob_de_sobrevivencia
 

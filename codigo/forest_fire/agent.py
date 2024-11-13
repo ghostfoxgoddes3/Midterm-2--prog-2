@@ -27,4 +27,3 @@ class TreeCell(mesa.Agent):
                         neighbor.condition = "On Fire"
             self.condition = "Burned Out"
 
-

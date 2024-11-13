@@ -42,7 +42,7 @@ def forest_fire_portrayal(agent):
     elif isinstance(agent, Person):
         # Representação para as pessoas
         if agent.condition == "Alive":
-            text = "👤"  # Pessoa viva (emoji)
+            text = ""  # Pessoa viva (emoji)
             portrayal["Color"] = COLORS["Alive"]  # Cor de rosa para pessoas vivas
         elif agent.condition == "Dead":
             text = "💀"  # Pessoa morta (emoji)

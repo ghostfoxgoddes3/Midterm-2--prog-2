@@ -19,7 +19,7 @@ class ForestFire(mesa.Model):
         super().__init__()
         # Set up model objects
         self.schedule = mesa.time.RandomActivation(self)
-        self.grid = mesa.space.SingleGrid(width, height, torus=False)
+        self.grid = mesa.space.MultiGrid(width, height, torus=False)
         self.prob_de_sobrevivencia = prob_de_sobrevivencia  # Adiciona a probabilidade de sobrevivência
         self.datacollector = mesa.DataCollector(
             {

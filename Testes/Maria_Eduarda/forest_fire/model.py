@@ -1,25 +1,26 @@
 import mesa
 
-from agent import TreeCell
+from agent import TreeCell, Person
 
 class ForestFire(mesa.Model):
     """
     Simple Forest Fire model.
     """
 
-    def __init__(self, width=100, height=100, density=0.65):
+    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.5,num_pessoas=10):
         """
         Create a new forest fire model.
 
         Args:
             width, height: The size of the grid to model
             density: What fraction of grid cells have a tree in them.
+            prob_de_sobrevivencia: The probability that a tree survives fire.
         """
         super().__init__()
         # Set up model objects
         self.schedule = mesa.time.RandomActivation(self)
         self.grid = mesa.space.SingleGrid(width, height, torus=False)
-
+        self.prob_de_sobrevivencia = prob_de_sobrevivencia  # Adiciona a probabilidade de sobrevivência
         self.datacollector = mesa.DataCollector(
             {
                 "Fine": lambda m: self.count_type(m, "Fine"),
@@ -39,6 +40,14 @@ class ForestFire(mesa.Model):
                     new_tree.condition = "On Fire"
                 self.grid.place_agent(new_tree, (x, y))
                 self.schedule.add(new_tree)
+
+        # Coloca pessoas no grid
+        for _ in range(num_pessoas):
+            x = self.random.randint(0, self.grid.width - 1)
+            y = self.random.randint(0, self.grid.height - 1)
+            new_person = Person((x, y), self)
+            self.grid.place_agent(new_person, (x, y))
+            self.schedule.add(new_person)
             
 
 

@@ -2,7 +2,7 @@ import mesa
 
 #Testando mudanças com o código da Laura
 class TreeCell(mesa.Agent):
-    def __init__(self, pos, model, prob_de_sobrevivencia=0.5):
+    def __init__(self, pos, model, prob_de_sobrevivencia=0):
         """
         Create a new tree with a given probability of survival.
         Args:
@@ -50,14 +50,17 @@ class Person(mesa.Agent):
         """
 
         if self.condition == "Alive":
-            # Verificando se a própria posição da pessoa está pegando fogo
+            self.condition = "Dead"
+            '''# Verificando se a própria posição da pessoa está pegando fogo
             current_cell = self.model.grid.get_cell_list_contents([self.pos])
-            if any(agent.condition == "On Fire" for agent in current_cell):
+            if any([agent.condition == "On Fire" for agent in current_cell]): #True
+                    if self.fire_resistance == 0:
+                        self.condition = "Dead"
                     # Check survival probability
                     if self.random.random() > self.fire_resistance: # Se a pessoa não sobrevive ao fogo
                         self.condition = "Dead" #morreu
                         return
-                    #Se não caiu no IF anterior, é porque está viva e reperte o loop
+                    #Se não caiu no IF anterior, é porque está viva e reperte o loop'''
 
         '''
         # Verificando os vizinhos da pessoa (onde o fogo pode se espalhar)

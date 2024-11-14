@@ -43,29 +43,14 @@ def forest_fire_portrayal(agent):
     # Verificar se o agente é uma árvore ou uma pessoa
     if isinstance(agent, TreeCell):
         # Representação para as árvores
-        if agent.condition == "Fine":
-            text = "v"  # Árvore saudável
-        elif agent.condition == "On Fire":
-            text = "🔥"  # Árvore pegando fogo
-        elif agent.condition == "Burned Out":
-            text = "♥"  # Árvore queimada
-        
-        portrayal["Color"] = COLORS[agent.condition]  # Cor das árvores
-        portrayal["text"] = text  # Emoji para as árvores
-        portrayal["text_color"] = COLORS[agent.condition]  # Cor do emoji para árvores
-
-    elif isinstance(agent, Person):
-        # Representação para as pessoas
-        if agent.condition == "Alive":
-            text = ""  # Pessoa viva (emoji)
-            portrayal["Color"] = COLORS["Alive"]  # Cor de rosa para pessoas vivas
-        elif agent.condition == "Dead":
-            text = "💀"  # Pessoa morta (emoji)
-            portrayal["Color"] = COLORS["Dead"]  # Cor cinza para pessoas mortas
-
-        portrayal["text"] = text  # Emoji para pessoas
-        portrayal["text_color"] = COLORS[agent.condition]  # Cor do emoji para pessoas
-        portrayal["Layer"] = 1  # Camada para as pessoas, acima das árvores
+        portrayal = {
+            "Shape": "rect",  # Forma retangular das células
+            "Filled": "true",
+            "Color": COLORS[agent.condition],  # Cor da árvore com base no estado
+            "Layer": 0,  # Camada das árvores
+            "w": 1,  # Largura da célula
+            "h": 1  # Altura da célula
+        }
 
     # Posições no grid
     x, y = agent.pos

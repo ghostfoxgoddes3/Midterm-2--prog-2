@@ -1,5 +1,5 @@
 import mesa
-
+#from mesa.time import BaseScheduler
 from agent import TreeCell, Person
 
 class ForestFire(mesa.Model):
@@ -18,7 +18,7 @@ class ForestFire(mesa.Model):
         """
         super().__init__()
         # Set up model objects
-        self.schedule = mesa.time.RandomActivation(self)
+        self.schedule = mesa.time.RandomActivationByType(self)
         self.grid = mesa.space.MultiGrid(width, height, torus=False)
         self.prob_de_sobrevivencia = prob_de_sobrevivencia  # Adiciona a probabilidade de sobrevivência
         self.datacollector = mesa.DataCollector(
@@ -54,17 +54,41 @@ class ForestFire(mesa.Model):
         self.running = True
         self.datacollector.collect(self)
 
-    def step(self):
+    def step(self): #, shuffle_types = False, shuffle_agents = False
         """
-        Advance the model by one step.
+        Avança o modelo por um passo.
         """
-        self.schedule.step()
-        # collect data
+        # Estive tendo problema na ativação da condição de vida da pessoa  morrer, 
+        # porque se o step da pessoa ocorrer antes da arvore, não é encontrado fogo
+        # naquele quadrante do grid, então a pessoa não morre
+        # Para resolver isso, eu coloquei a arvore em primeiro lugar na lista de agent
+                # Primeiro, ativa os agentes do tipo "TreeCell" (Árvores)
+
+        self.schedule.step_type(TreeCell)
+        
+        self.schedule.step_type(Person)
+        
+        '''
+        # Primeiro, ativa os agentes do tipo "TreeCell" (Árvores)
+        for agent in self.schedule.agents:
+            if isinstance(agent, TreeCell):
+                agent.step()
+                self.schedule.add(agent)
+
+        # Depois, ativa os agentes do tipo "Person" (Pessoas)
+        for agent in self.schedule.agents:
+            if isinstance(agent, Person):
+                agent.step()
+                self.schedule.add(agent)
+        '''
+
+        # Coleta os dados para análise
         self.datacollector.collect(self)
 
-        # Halt if no more fire
+        # Se não há mais árvores pegando fogo, a simulação é parada
         if self.count_type(self, "On Fire") == 0:
             self.running = False
+
 
     @staticmethod
     def count_type(model, tree_condition):

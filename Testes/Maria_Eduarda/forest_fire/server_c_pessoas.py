@@ -3,11 +3,11 @@ from model import ForestFire, Person, TreeCell
 
 # Cores para os diferentes estados das árvores e das pessoas
 COLORS = {
-    "Fine": "#46951e",  # Cor para árvores saudáveis
+    "Fine": "#9bf587",  # Cor para árvores saudáveis
     "On Fire": "#FF6666",  # Cor para árvores pegando fogo
-    "Burned Out": "#4d305f",  # Cor para árvores queimadas
+    "Burned Out": "#d4d6d5",  # Cor para árvores queimadas
     "Alive": "#FF66CC",  # Cor de rosa para pessoas vivas
-    "Dead": "#808080"  # Cor cinza para pessoas mortas
+    "Dead": "#111212"  # Cor cinza para pessoas mortas
 }
 
 def forest_fire_portrayal(agent):
@@ -16,15 +16,30 @@ def forest_fire_portrayal(agent):
     """
     if agent is None:
         return None
+    
+    portrayal = {}  # Inicializando o dicionário de visualização
 
-    portrayal = {
-        "Shape": "rect",  # Forma retangular das células
-        "Filled": "true",
-        "Layer": 0,  # Camada das árvores
-        "w": 1,  # Largura da célula
-        "h": 1,  # Altura da célula
-    }
-
+    if isinstance(agent, Person):
+        # Representação para as pessoas
+        portrayal["Layer"] = 1  # Camada para as pessoas, acima das árvores
+        if agent.condition == "Alive":
+            portrayal = {
+                "Shape": "circle",  # Forma circular para pessoas vivas
+                "Filled": "true",
+                "Color": COLORS["Alive"],  # Cor para pessoas vivas
+                "Layer": 1,  # Camada das pessoas
+                "r": 0.5  # Raio do círculo
+            }
+        elif agent.condition == "Dead":
+            portrayal = {
+                "Shape": "rect",  # Forma retangular para pessoas mortas
+                "Filled": "true",
+                "Color": COLORS["Dead"],  # Cor para pessoas mortas
+                "Layer": 1,  # Camada das pessoas
+                "w": 1,  # Largura da célula
+                "h": 1  # Altura da célula
+            }
+            
     # Verificar se o agente é uma árvore ou uma pessoa
     if isinstance(agent, TreeCell):
         # Representação para as árvores

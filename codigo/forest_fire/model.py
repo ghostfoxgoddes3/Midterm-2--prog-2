@@ -34,7 +34,7 @@ class ForestFire(mesa.Model):
         for contents, (x, y) in self.grid.coord_iter():
             if self.random.random() < density:
                 # Create a tree
-                new_tree = TreeCell((x, y), self)
+                new_tree = TreeCell((x, y), self, self.prob_de_sobrevivencia)
                 # Set all trees in the first column on fire.
                 if x == 0:
                     new_tree.condition = "On Fire"

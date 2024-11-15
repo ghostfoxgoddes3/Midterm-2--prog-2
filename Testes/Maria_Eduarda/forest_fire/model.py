@@ -62,26 +62,19 @@ class ForestFire(mesa.Model):
         # porque se o step da pessoa ocorrer antes da arvore, não é encontrado fogo
         # naquele quadrante do grid, então a pessoa não morre
         # Para resolver isso, eu coloquei a arvore em primeiro lugar na lista de agent
-                # Primeiro, ativa os agentes do tipo "TreeCell" (Árvores)
+        # Primeiro, ativa os agentes do tipo "TreeCell" (Árvores)
+       
+        '''
+        # Primeiro, ativa os agentes do tipo "TreeCell" (Árvores)
+        # Depois, ativa os agentes do tipo "Person" (Pessoas)
 
         self.schedule.step_type(TreeCell)
         
         self.schedule.step_type(Person)
+
+        '''
         
-        '''
-        # Primeiro, ativa os agentes do tipo "TreeCell" (Árvores)
-        for agent in self.schedule.agents:
-            if isinstance(agent, TreeCell):
-                agent.step()
-                self.schedule.add(agent)
-
-        # Depois, ativa os agentes do tipo "Person" (Pessoas)
-        for agent in self.schedule.agents:
-            if isinstance(agent, Person):
-                agent.step()
-                self.schedule.add(agent)
-        '''
-
+        self.schedule.step()
         # Coleta os dados para análise
         self.datacollector.collect(self)
 

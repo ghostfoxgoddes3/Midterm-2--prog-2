@@ -50,27 +50,47 @@ class Person(mesa.Agent):
         """
 
         if self.condition == "Alive":
-            self.condition = "Dead"
+            #self.condition = "Dead"
             # Verificando se a própria posição da pessoa está pegando fogo
             current_cell = self.model.grid.get_cell_list_contents([self.pos])
-            if any([agent.condition == "On Fire" for agent in current_cell]): #True
+            """
+            modifiquei a condição antiga:
+            if any([agent.condition == "On Fire" for agent in current_cell]):
+            
+            Durante os testes, identifiquei um comportamento inesperado na interação entre os agentes `Person` e `TreeCell`. 
+            Se o método `step` da classe `Person` fosse executado antes do método `step` da classe `TreeCell`, 
+            as árvores próximas não teriam atualizado sua condição para "On Fire", resultando em um cenário onde 
+            a pessoa permanecia viva mesmo estando em uma área que deveria estar em chamas.
+
+            Porém, se no próximo método `step` da classe `TreeCell` fosse executado primeiro, a árvore já poderia 
+            ter sua condição atualizada para "Burned Out", e a pessoa novamente não seria afetada.
+
+            Assim inclui a condição "Burned Out" também para garantimos que a pessoa possa ser afetada mesmo que a árvore no mesmo 
+            espaço tenha progredido para a condição "Burned Out".
+
+            Essa alteração, eventualmente, condena a pessoa a morrer, mesmo que a árvore tenha sido reduzida a cinzas.
+            """
+            if any([agent.condition == "On Fire" or agent.condition == "Burned Out" for agent in current_cell]): #True
                     if self.fire_resistance == 0:
                         self.condition = "Dead"
                     # Check survival probability
                     if self.random.random() > self.fire_resistance: # Se a pessoa não sobrevive ao fogo
                         self.condition = "Dead" #morreu
-                        return
-                    #Se não caiu no IF anterior, é porque está viva e reperte o loop'''
+                        return #não precisa continuar executando o método
+                    #Se não caiu no IF anterior, é porque está viva e reperte o loop
 
-        '''
-        # Verificando os vizinhos da pessoa (onde o fogo pode se espalhar)
-        for neighbor in self.model.grid.iter_neighbors(self.pos, True):
-            if neighbor.condition == "On Fire":
-                # Verificar se a pessoa morre ou sobrevive ao fogo
-                if self.random.random() > self.smoke_resistance:
-                    self.condition = "Dead"  # A pessoa morre
-                    break  # Não precisa continuar verificando
-        '''          
+            # Verificando os vizinhos da pessoa (onde o fogo pode se espalhar)
+            for neighbor in self.model.grid.iter_neighbors(self.pos, True):
+                if neighbor.condition == "On Fire":
+                    # Verificar se a pessoa morre ou sobrevive ao fogo
+                    if self.random.random() > self.smoke_resistance:
+                        self.condition = "Dead"  # A pessoa morre
+                        break  # Não precisa continuar verificando
+
+
+
+
+       
 
 
 

@@ -71,7 +71,7 @@ tree_chart = mesa.visualization.ChartModule(
 
 # Gráfico de pizza para a distribuição das árvores e pessoas
 pie_chart = mesa.visualization.PieChartModule(
-    [{"Label": label, "Color": color} for label, color in COLORS.items()]
+    [{"Label": label, "Color": color} for label, color in COLORS.items() if label != "Alive" and label != "Dead"]
 )
 
 # Parâmetros do modelo (dimensões do grid, densidade das árvores e probabilidade de sobrevivência)

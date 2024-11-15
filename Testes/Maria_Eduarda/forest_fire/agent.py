@@ -67,8 +67,6 @@ class Person(mesa.Agent):
 
             Assim inclui a condição "Burned Out" também para garantimos que a pessoa possa ser afetada mesmo que a árvore no mesmo 
             espaço tenha progredido para a condição "Burned Out".
-
-            Essa alteração, eventualmente, condena a pessoa a morrer, mesmo que a árvore tenha sido reduzida a cinzas.
             """
             if any([agent.condition == "On Fire" or agent.condition == "Burned Out" for agent in current_cell]): #True
                     if self.fire_resistance == 0:

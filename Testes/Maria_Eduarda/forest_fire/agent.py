@@ -51,7 +51,7 @@ class Person(mesa.Agent):
 
         if self.condition == "Alive":
             self.condition = "Dead"
-            '''# Verificando se a própria posição da pessoa está pegando fogo
+            # Verificando se a própria posição da pessoa está pegando fogo
             current_cell = self.model.grid.get_cell_list_contents([self.pos])
             if any([agent.condition == "On Fire" for agent in current_cell]): #True
                     if self.fire_resistance == 0:

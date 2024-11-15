@@ -1,29 +1,32 @@
-import mesa
+from mesa import Agent
 
-
-class TreeCell(mesa.Agent):
+class TreeCell(Agent):
     def __init__(self, pos, model, prob_de_sobrevivencia=0.5):
-        """
-        Create a new tree with a given probability of survival.
-        Args:
-            pos: The tree's coordinates on the grid.
-            model: standard model reference for agent.
-            prob_de_sobrevivencia: Probability of the tree surviving the fire.
-        """
         super().__init__(pos, model)
         self.pos = pos
-        self.condition = "Fine"
-        self.prob_de_sobrevivencia = prob_de_sobrevivencia  # New attribute
+        self.model = model
+        self.condition = "Fine"  # Possíveis condições: "Fine", "On Fire", "Burned Out"
+        self.prob_de_sobrevivencia = prob_de_sobrevivencia
 
     def step(self):
-        """
-        If the tree is on fire, spread it to fine trees nearby with a chance of survival.
-        """
+        # Apenas espalha fogo se a árvore está pegando fogo
         if self.condition == "On Fire":
-            for neighbor in self.model.grid.iter_neighbors(self.pos, True):
+            print(f"Tree at {self.pos} is on fire, spreading fire to neighbors...")
+            for neighbor in self.model.grid.get_neighbors(self.pos, moore=True, include_center=False):
                 if neighbor.condition == "Fine":
-                    # Check survival probability
-                    if self.random.random() > neighbor.prob_de_sobrevivencia:
+                    print(f"Checking tree at {neighbor.pos} with survival probability {neighbor.prob_de_sobrevivencia}")
+                    random_value = self.random.random()
+                    print(f"Generated random value: {random_value}")
+
+                    # Se a probabilidade de sobrevivência for 1, a árvore não queima
+                    if neighbor.prob_de_sobrevivencia == 1:
+                        print(f"Tree at {neighbor.pos} has a survival probability of 1, it will not burn.")
+                    # Se o valor aleatório for menor que a probabilidade de sobrevivência, a árvore sobrevive
+                    elif random_value < neighbor.prob_de_sobrevivencia:
+                        print(f"Tree at {neighbor.pos} survived the fire.")
+                    else:
+                        print(f"Tree at {neighbor.pos} burned due to random value exceeding survival probability.")
                         neighbor.condition = "On Fire"
             self.condition = "Burned Out"
-
+        else:
+            print(f"Tree at {self.pos} is in state: {self.condition}")

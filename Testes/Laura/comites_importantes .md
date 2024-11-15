@@ -1,7 +1,15 @@
 # Updates
-- Aqui serão incluídos apenas os updates essenciais feitos, no código, por mim.
+- Aqui serão incluídos apenas os updates essenciais feitos, no código, por mim. Mas, em resumo:
 
-## Update 1 - prob_de_sobrevivencia
+Criei e implementei a probabilidade de sobrevivência nas três partes do código.
+
+
+
+
+
+
+
+## Update 1 - prob_de_sobrevivencia agent
 
 - Segue abaixo a alteração feita no código
 
@@ -37,7 +45,7 @@ class TreeCell(mesa.Agent):
 
    
 
-## Update 2 - prob_de_sobrevivencia
+## Update 2 - prob_de_sobrevivencia - model
 
 - Segue abaixo a alteração feita no código
   
@@ -58,7 +66,7 @@ class TreeCell(mesa.Agent):
 
 
   
-## Update 3 - prob_de_sobrevivencia
+## Update 3 - prob_de_sobrevivencia - server
 
 - Segue abaixo a alteração feita no código
 
@@ -76,6 +84,54 @@ server = mesa.visualization.ModularServer(
 
 server.port = 8521  # Porta do servidor
 server.launch()
+
+
+
+## Update 4 - prob_de_sobrevivencia - agent
+
+- Segue abaixo a alteração feita no código
+
+        self.model = model
+        self.condition = "Fine"  # Possíveis condições: "Fine", "On Fire", "Burned Out"
+        self.prob_de_sobrevivencia = prob_de_sobrevivencia
+
+
+   print(f"Tree at {self.pos} is on fire, spreading fire to neighbors...")
+            for neighbor in self.model.grid.get_neighbors(self.pos, moore=True, include_center=False):
+
+
+   print(f"Checking tree at {neighbor.pos} with survival probability {neighbor.prob_de_sobrevivencia}")
+                    random_value = self.random.random()
+                    print(f"Generated random value: {random_value}")
+                    # Se a probabilidade de sobrevivência for 1, a árvore não queima
+                    if neighbor.prob_de_sobrevivencia == 1:
+                        print(f"Tree at {neighbor.pos} has a survival probability of 1, it will not burn.")
+                    # Se o valor aleatório for menor que a probabilidade de sobrevivência, a árvore sobrevive
+                    elif random_value < neighbor.prob_de_sobrevivencia:
+                        print(f"Tree at {neighbor.pos} survived the fire.")
+                    else:
+                        print(f"Tree at {neighbor.pos} burned due to random value exceeding survival probability.")
+
+
+   else:
+            print(f"Tree at {self.pos} is in state: {self.condition}")
+
+
+
+
+## Update 5 - prob_de_sobrevivencia - model
+
+- Segue abaixo a alteração feita no código
+
+
+                new_tree = TreeCell((x, y), self, self.prob_de_sobrevivencia)
+
+
+
+
+
+
+
 
 
 

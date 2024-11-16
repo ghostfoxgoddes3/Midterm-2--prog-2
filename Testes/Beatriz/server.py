@@ -35,7 +35,7 @@ model_params = {
     "width": 100,
     "density": mesa.visualization.Slider("Tree density", 0.65, 0.01, 1.0, 0.01),
     "prob_de_sobrevivencia": mesa.visualization.Slider("Probability of survival", 0.5, 0.0, 1.0, 0.01),
-    "vento": mesa.visualization.Choice("Wind Direction", value="Norte", choices=["Norte", "Sul", "Leste", "Oeste"])
+    "vento": mesa.visualization.Choice("Wind Direction", value="Sem direção", choices=["Norte", "Sul", "Leste", "Oeste", "Sem direção"])
 }
 
 # Inicializando o servidor

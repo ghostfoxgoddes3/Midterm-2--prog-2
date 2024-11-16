@@ -18,23 +18,6 @@ class TreeCell(mesa.Agent):
                     neighbor.condition = "On Fire"  # Torna o vizinho em chamas
             self.condition = "Burned Out"  # A árvore que pegou fogo se queima
 
-
-class Person(mesa.Agent):
-    #Classe para as pessoas envolvidas na simulação
-    def __init__(self, pos, model, resistencia_fogo = 0, resistencia_fumaca = 0.5):
-        """
-        Cria pessoas
-        Args:
-            pos: coordenada atual da pessoa no grid.
-            model: standard model reference for agent.
-        """
-        super().__init__(pos, model)
-        self.pos = pos
-        self.condition = "Alive" #condição viva ou morta
-        self.speed = 1  # Velocidade da pessoa
-        self.fire_resistance = resistencia_fogo  # Resistência da pessoa ao fogo
-        self.smoke_resistance = resistencia_fumaca  # Resistência da pessoa aa fumaça (fogo em áreas vizinhas)
-
 class Person(mesa.Agent):
     #Classe para as pessoas envolvidas na simulação
     def __init__(self, pos, model, resistencia_fogo = 0, resistencia_fumaca = 0.5):

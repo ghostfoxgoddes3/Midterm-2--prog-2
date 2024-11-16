@@ -1,6 +1,6 @@
 import mesa
 #from mesa.time import BaseScheduler
-from agent import TreeCell, Person
+from agent import TreeCell, GroundFirefighter
 
 class ForestFire(mesa.Model):
     """
@@ -41,11 +41,11 @@ class ForestFire(mesa.Model):
                 self.grid.place_agent(new_tree, (x, y))
                 self.schedule.add(new_tree)
 
-        # Coloca pessoas no grid
+        # Coloca bombeiros terrestres no grid
         for _ in range(num_pessoas):
-            x = self.random.randint(0, self.grid.width - 1)
+            x = 99
             y = self.random.randint(0, self.grid.height - 1)
-            new_person = Person((x, y), self)
+            new_person = GroundFirefighter((x, y), self)
             self.grid.place_agent(new_person, (x, y))
             self.schedule.add(new_person)
             

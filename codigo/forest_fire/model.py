@@ -1,68 +1,80 @@
 import mesa
-from agent import TreeCell
+import math
+from agent import TreeCell, CityCell  # Importando as classes TreeCell e CityCell
 
 
 class ForestFire(mesa.Model):
     """
-    Simple Forest Fire model.
+    Modelo de incêndio florestal com árvores e cidades.
     """
 
-    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.5):
+    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.0, city_probability=0.01):
         """
-        Create a new forest fire model.
+        Cria um novo modelo de incêndio florestal com árvores e cidades.
 
         Args:
-            width, height: The size of the grid to model
-            density: What fraction of grid cells have a tree in them.
-            prob_de_sobrevivencia: The probability that a tree survives fire.
+            width, height: O tamanho da grade para modelar
+            density: A fração de células com árvores
+            prob_de_sobrevivencia: A probabilidade de uma árvore sobreviver ao fogo
+            city_probability: A probabilidade de uma célula ser uma cidade
         """
         super().__init__()
-        # Set up model objects
+
+        # Configura objetos do modelo
         self.schedule = mesa.time.RandomActivation(self)
-        self.grid = mesa.space.SingleGrid(width, height, torus=False)
-        self.prob_de_sobrevivencia = prob_de_sobrevivencia  # Adiciona a probabilidade de sobrevivência
+        self.grid = mesa.space.MultiGrid(width, height, torus=False)
+        self.prob_de_sobrevivencia = prob_de_sobrevivencia  # Probabilidade de sobrevivência das árvores
 
         self.datacollector = mesa.DataCollector(
             {
                 "Fine": lambda m: self.count_type(m, "Fine"),
                 "On Fire": lambda m: self.count_type(m, "On Fire"),
                 "Burned Out": lambda m: self.count_type(m, "Burned Out"),
+                "Cities Evacuated": lambda m: self.count_type(m, "Evacuated"),  # Contando cidades evacuadas
             }
         )
 
-        # Place a tree in each cell with Prob = density
+        # Coloca árvores e cidades nas células
         for contents, (x, y) in self.grid.coord_iter():
             if self.random.random() < density:
-                # Create a tree
+                # Cria uma árvore com a probabilidade de sobrevivência
                 new_tree = TreeCell((x, y), self, self.prob_de_sobrevivencia)
-                # Set all trees in the first column on fire.
+                # Define todas as árvores da primeira coluna como "On Fire"
                 if x == 0:
                     new_tree.condition = "On Fire"
                 self.grid.place_agent(new_tree, (x, y))
                 self.schedule.add(new_tree)
+
+            # Cria cidades com base na probabilidade
+            elif self.random.random() < city_probability:
+                city = CityCell((x, y), self)
+                self.grid.place_agent(city, (x, y))
+                self.schedule.add(city)
 
         self.running = True
         self.datacollector.collect(self)
 
     def step(self):
         """
-        Advance the model by one step.
+        Avança o modelo por um passo.
         """
         self.schedule.step()
-        # collect data
+        # Coleta dados
         self.datacollector.collect(self)
 
-        # Halt if no more fire
+        # Interrompe se não houver mais fogo
         if self.count_type(self, "On Fire") == 0:
             self.running = False
 
     @staticmethod
-    def count_type(model, tree_condition):
+    def count_type(model, condition):
         """
-        Helper method to count trees in a given condition in a given model.
+        Método auxiliar para contar agentes em uma dada condição no modelo.
         """
         count = 0
-        for tree in model.schedule.agents:
-            if tree.condition == tree_condition:
+        for agent in model.schedule.agents:
+            if isinstance(agent, TreeCell) and agent.condition == condition:
+                count += 1
+            elif isinstance(agent, CityCell) and agent.condition == condition:
                 count += 1
         return count

@@ -1,7 +1,7 @@
 import mesa
-from agent import TreeCell
+from agent import TreeCell, Person
 
-class GroundFirefighter(mesa.Agent):
+class GroundFirefighter(agent.Person):
     """O bombeiro que apaga o fogo"""
     def __init__(self, unique_id, model, pos):
         super().__init__(unique_id, model)

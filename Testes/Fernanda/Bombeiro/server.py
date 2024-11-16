@@ -1,6 +1,6 @@
 import mesa
-from model import ForestFire, Person, TreeCell
-from bombeiro import GroundFirefighter
+from model import ForestFire, Person, TreeCell, GroundFirefighter
+#from bombeiro import GroundFirefighter
 
 # Cores para os diferentes estados das árvores e das pessoas
 COLORS = {
@@ -8,7 +8,7 @@ COLORS = {
     "On Fire": "#FF6666",  # Cor para árvores pegando fogo
     "Burned Out": "#d4d6d5",  # Cor para árvores queimadas
     "Fire Off": "#6495ED", # Cor para árvore apagada pelo bombeiro
-    "GroundFirefighter": "#FFD700" # Cor do bombeiro
+    "GroundFirefighter": "#d4a117" # Cor do bombeiro
     #"Alive": "#FF66CC",  # Cor de rosa para pessoas vivas
     #"Dead": "#111212"  # Cor cinza para pessoas mortas
 }

@@ -1,7 +1,7 @@
 import mesa
 #from mesa.time import BaseScheduler
-from agent import TreeCell, Person
-from bombeiro import GroundFirefighter
+from agent import TreeCell, Person, GroundFirefighter
+#from bombeiro import GroundFirefighter
 from bombeiro_aereo import AirFirefighter
 
 class ForestFire(mesa.Model):

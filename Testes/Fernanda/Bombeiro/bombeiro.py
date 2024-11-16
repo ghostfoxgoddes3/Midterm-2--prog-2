@@ -1,14 +1,16 @@
 import mesa
 from agent import TreeCell, Person
 
-class GroundFirefighter(agent.Person):
-    """O bombeiro que apaga o fogo"""
-    def __init__(self, unique_id, model, pos):
-        super().__init__(unique_id, model)
-        self.pos = pos
+class GroundFirefighter(Person):
+    def __init__(self, pos, model, resistencia_fogo=1, resistencia_fumaca=1):
+        super().__init__(pos, model)  # Chama o construtor da classe Person
+        self.special_skill = "Firefighting"
+        self.speed = 1
+        self.resistencia_fogo = resistencia_fogo
+        self.resistencia_fumaca = resistencia_fumaca
 
     def step(self):
-        """Apaga o fogo das árvores próximas"""
+        """Método para apagar fogo nas árvores próximas"""
         # Verifica se há fogo na célula atual
         current_cell = self.model.grid.get_cell_list_contents(self.pos)
         tree = next((obj for obj in current_cell if isinstance(obj, TreeCell)), None)

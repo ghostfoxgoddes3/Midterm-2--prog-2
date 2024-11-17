@@ -250,3 +250,41 @@ server.launch()
 
 
 #NOSSO CÓDIGO (CLASSE CHUVA):
+
+'''
+No fim, após uma análise sobre a classe Chuva, solicitada pela Maria concluimos que é mais proveitoso trabalhar com uma classe Tempo, que seja responsável pelo clima.
+Nossa Classe Tempo terá informações sobre informações sobre temperatura, precipitação, pressão atmosférica e umidade.
+'''
+
+import random
+
+class Tempo: #classe que representa o tempo na região do modelo. 
+    
+    def __init__(self, temperatura_media=26.0, umidade_media=80.0, pressao_media=1013.25, precipitacao_media=5.0):
+        """
+        inicializa o clima com valores médios de temperatura, umidade, pressão e precipitação.
+        
+        - para temperatura_media: Temperatura média de uma floresta tropical em graus Celsius.
+        - para umidade_media: Umidade relativa média de uma floresta tropical em percentual.
+        - para pressao_media: Pressão atmosférica média de uma floresta tropical em hPa.
+        - para precipitacao_media: Precipitação média diária de uma floresta tropical em mm.
+        """
+        self.temperatura = temperatura_media
+        self.umidade = umidade_media
+        self.pressao = pressao_media
+        self.precipitacao = precipitacao_media
+
+    def atualizar_clima(self):
+        #temperatura com variação aleatória entre -2 e 2 graus
+        self.temperatura += random.uniform(-2.0, 2.0)
+        
+        #umidade com variação aleatória entre -5% e 5%
+        self.umidade += random.uniform(-5.0, 5.0)
+        self.umidade = max(0, min(100, self.umidade))
+        
+        #pressão  com variação aleatória entre -5 e 5 hPa
+        self.pressao += random.uniform(-5.0, 5.0)
+        self.pressao = max(900, min(1050, self.pressao))
+        
+        #precipitação
+        self.precipitacao = random.uniform(0.0, 15.0) if random.random() < 0.50 else 0.0

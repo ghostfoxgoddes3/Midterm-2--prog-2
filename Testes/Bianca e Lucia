@@ -1,3 +1,16 @@
+'''
+Organização:
+1. Código geral coemantado:
+        - Compreender todas as partes.
+2. Pensar em ideias para a implementação da classe Chuva.
+3. Implementar a classe Chuva em Agent.
+4. Implementar o Model da classe Chuva e garantir que todo o prijeto da chuva corre bem.
+5. Trabalhar em outra coisa.
+'''
+
+
+#CÓDIGO FOREST_FIRE:
+
 #agent
 import mesa
 import math
@@ -234,3 +247,6 @@ server = mesa.visualization.ModularServer(
 # Configurando a porta para o servidor
 server.port = 8521
 server.launch()
+
+
+#NOSSO CÓDIGO (CLASSE CHUVA):

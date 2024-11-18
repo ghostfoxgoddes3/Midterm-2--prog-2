@@ -12,4 +12,9 @@ Organização:
 4. Implementar o Model da classe Chuva e garantir que todo o projeto da chuva corre bem.
 
 5. Trabalhar em outra coisa.
+
+
+O que arrumar:
+1-Cálculo da temperatura e umidade considerando o quanto a floresta está pegando fogo
+2-Chuva a partir da percipitação
 '''

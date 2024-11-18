@@ -4,25 +4,34 @@
 No fim, após uma análise sobre a classe Chuva, solicitada pela Maria concluimos que é mais proveitoso trabalhar com uma classe Tempo, que seja responsável pelo clima.
 Nossa Classe Tempo terá informações sobre informações sobre temperatura, precipitação, pressão atmosférica e umidade.
 '''
-
 import random
+import mesa
 
-class Tempo: #classe que representa o tempo na região do modelo. 
-    
-    def __init__(self, temperatura_media=26.0, umidade_media=80.0, pressao_media=1013.25, precipitacao_media=5.0):
+class Clima(mesa.Agent): #classe que representa o tempo na região do modelo.
+
+    def __init__(self, pos, model, temperatura_media=26.0, umidade_media=80.0, pressao_media=1013.25, precipitacao_media=5.0):
         """
-        inicializa o clima com valores médios de temperatura, umidade, pressão e precipitação.
-        
-        - para temperatura_media: Temperatura média de uma floresta tropical em graus Celsius.
-        - para umidade_media: Umidade relativa média de uma floresta tropical em percentual.
-        - para pressao_media: Pressão atmosférica média de uma floresta tropical em hPa.
-        - para precipitacao_media: Precipitação média diária de uma floresta tropical em mm.
+        Inicializa o clima com valores médios de temperatura, umidade, pressão e precipitação.
+
+        para temperatura_media: Temperatura média de uma floresta tropical em graus Celsius.
+        para umidade_media: Umidade relativa média de uma floresta tropical em percentual.
+        para pressao_media: Pressão atmosférica média de uma floresta tropical em hPa.
+        para precipitacao_media: Precipitação média diária de uma floresta tropical em mm.
         """
+        super().__init__(pos, model)
+        self.pos = pos
         self.temperatura = temperatura_media
         self.umidade = umidade_media
         self.pressao = pressao_media
         self.precipitacao = precipitacao_media
 
+    def step(self):
+        if self.temperatura >= 30.0 and self.umidade >= 30.0 and self.precipitacao <= 10.0:
+            for agent in self.model.schedule.agents:
+                if isinstance(agent, TreeCell) and agent.condition == 'Fine':
+                    agent.condition = 'On Fire'
+
+#Arrumar isso aqui: 
     def atualizar_clima(self):
         #temperatura com variação aleatória entre -2 e 2 graus
         self.temperatura += random.uniform(-2.0, 2.0)

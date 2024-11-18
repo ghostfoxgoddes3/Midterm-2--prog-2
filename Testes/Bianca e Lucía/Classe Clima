@@ -31,6 +31,26 @@ class Clima(mesa.Agent): #classe que representa o tempo na região do modelo.
                 if isinstance(agent, TreeCell) and agent.condition == 'Fine':
                     agent.condition = 'On Fire'
 
+    #@staticmethod? perguntar ao João sobre.
+    def verificar_fogo(model):
+        total_de_arvores = 0
+        arvores_queimando = 0
+
+        for agent in model.schedule.agents:
+            total_de_arvores += 1
+            if isinstance(agent, TreeCell):
+                if agent.condition == "On Fire":
+                    arvores_queimando += 1
+
+        if total_de_arvores > 0:
+            porcentagem = (arvores_queimando / total_de_arvores) * 100
+        else:
+            porcentagem = 0
+        return porcentagem
+
+
+
+
 #Arrumar isso aqui: 
     def atualizar_clima(self):
         #temperatura com variação aleatória entre -2 e 2 graus

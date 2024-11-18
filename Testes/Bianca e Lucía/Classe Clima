@@ -1,4 +1,4 @@
-#NOSSO CÓDIGO (CLASSE CHUVA):
+#NOSSO CÓDIGO (CLASSE CLIMA):
 
 '''
 No fim, após uma análise sobre a classe Chuva, solicitada pela Maria concluimos que é mais proveitoso trabalhar com uma classe Tempo, que seja responsável pelo clima.

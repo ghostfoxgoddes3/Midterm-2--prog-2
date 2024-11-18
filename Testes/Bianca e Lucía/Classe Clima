@@ -51,18 +51,69 @@ class Clima(mesa.Agent): #classe que representa o tempo na região do modelo.
 
 
 
-#Arrumar isso aqui: 
-    def atualizar_clima(self):
-        #temperatura com variação aleatória entre -2 e 2 graus
-        self.temperatura += random.uniform(-2.0, 2.0)
-        
-        #umidade com variação aleatória entre -5% e 5%
-        self.umidade += random.uniform(-5.0, 5.0)
-        self.umidade = max(0, min(100, self.umidade))
-        
-        #pressão  com variação aleatória entre -5 e 5 hPa
-        self.pressao += random.uniform(-5.0, 5.0)
-        self.pressao = max(900, min(1050, self.pressao))
-        
-        #precipitação
-        self.precipitacao = random.uniform(0.0, 15.0) if random.random() < 0.50 else 0.0
+@staticmethod
+    def verificar_queimadas(model):
+        total_de_arvores = 0
+        arvores_queimadas = 0
+
+        for agent in model.schedule.agents:
+            total_de_arvores += 1
+            if isinstance(agent, TreeCell):
+                if agent.condition == "Burned Out":
+                    arvores_queimadas += 1
+
+        if total_de_arvores > 0:
+            porcentagem = (arvores_queimadas / total_de_arvores) * 100
+        else:
+            porcentagem = 0
+        return porcentagem
+
+    def atualizar_clima(self, model):
+        '''
+        media da arvore queimando: 350 a 550
+        media da floresta queimando: 800 a 1200
+        media do lugar quando há incêndio: de 30 a 60
+        rescaldo (temperatura do chão e restos de queimada): 200 a 600
+        '''
+        porcentagem_fogo = self.verificar_fogo(model)
+        porcentagem_queimadas = self.verificar_queimadas(model)
+
+        self.precipitacao = random.uniform(0.0, 15.0) if random.random() < 0.40 else 0.0
+
+        if isinstance(agent, TreeCell):
+            if agent.condition == "Fine":
+                self.city_temp += random.uniform(-2.0, 2.0)
+
+                self.temperatura += random.uniform(-2.0, 2.0)
+
+                self.umidade += random.uniform(-5.0, 5.0)
+                self.umidade = max(0, min(100, self.umidade))
+
+                self.pressao += random.uniform(-5.0, 5.0)
+                self.pressao = max(900, min(1050, self.pressao))
+
+            if agent.condition == "On Fire":
+                self.city_temp += (random.uniform(30.0, 60.0)*(porcentagem_fogo/100))
+                self.city_temp = min(max(self.city_temp, 30.0), 60.0)
+
+                self.temperatura += (random.uniform(800.0, 1200.0)*(porcentagem_fogo/100))
+
+                self.umidade -= (random.uniform(self.umidade/2,self.umidade))*(porcentagem_fogo/100)
+
+                if porcentagem_fogo >= 60:
+                    self.pressão -= (random.uniform(5, 20))*(porcentagem_fogo/100)
+                    self.pressao = max(900, min(1050, self.pressao))
+
+            if agent.condition == "Burned Out":
+                if porcentagem_queimadas >= 60:
+                    self.city_temp += random.uniform(-1, 5)
+                    self.city_temp = min(max(self.city_temp, 28.0), 36.0)
+
+                    self.temperatura += random.uniform(200, 600)*(porcentagem_queimadas/100)
+                    self.temperatura = min(max(self.temperatura, 30.0), 37.0)
+
+                    self.umidade += random.uniform(-5.0, 5.0)
+                    self.umidade = max(0, min(80, self.umidade))
+
+                    self.pressao += random.uniform(-5.0, 5.0)
+                    self.pressao = max(900, min(1050, self.pressao))

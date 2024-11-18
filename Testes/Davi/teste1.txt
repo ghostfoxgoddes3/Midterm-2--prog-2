@@ -1,3 +1,85 @@
-ola mundo
 
-teste do teste
+# Sub-classes Incendiary e Police da classe Person (primeira versão).
+
+class Incendiary(Person):
+    """
+    Classe para representar um incendiário.
+    Ele anda pela floresta e, ocasionalmente, coloca fogo nas árvores ao seu redor.
+    """
+    def __init__(self, pos, model, chance_incendiar=0.3):
+        """
+        Args:
+            pos: coordenada inicial do incendiário no grid.
+            model: referência ao modelo.
+            chance_incendiar: chance de colocar fogo em uma árvore adjacente em cada passo.
+        """
+        super().__init__(pos, model)
+        self.chance_incendiar = chance_incendiar  # Probabilidade de incendiar uma árvore
+
+    def step(self):
+        """
+        O incendiário anda pelo grid e tenta incendiar árvores próximas.
+        """
+        if self.condition == "Alive":
+            # Movendo o incendiário para uma célula com maior probabilidade de incêndio
+            next_moves = self.model.grid.get_neighborhood(self.pos, True, False)
+            best_move = max(
+                next_moves,
+                key=lambda move: sum(
+                    1 for neighbor in self.model.grid.get_neighbors(move, True)
+                    if isinstance(neighbor, TreeCell) and neighbor.condition == "Fine"
+                ),
+                default=self.pos
+            )
+            self.model.grid.move_agent(self, best_move)
+
+            # Tentando incendiar árvores vizinhas
+            for neighbor in self.model.grid.iter_neighbors(self.pos, True):
+                if isinstance(neighbor, TreeCell) and neighbor.condition == "Fine":
+                    if self.random.random() < self.chance_incendiar:
+                        neighbor.condition = "On Fire"  # Incendiar a árvore
+
+
+class Police(Person):
+    """
+    Classe para representar um policial.
+    Ele anda pela floresta tentando encontrar e capturar incendiários.
+    """
+    def __init__(self, pos, model, range_view=2):
+        """
+        Args:
+            pos: coordenada inicial do policial no grid.
+            model: referência ao modelo.
+            range_view: raio de visão do policial para capturar incendiários.
+        """
+        super().__init__(pos, model)
+        self.range_view = range_view  # Raio de visão do policial
+
+    def step(self):
+        """
+        O policial anda pelo grid e captura incendiários próximos.
+        """
+        if self.condition == "Alive":
+            # Procurando incendiários na vizinhança
+            incendiaries = [
+                agent for agent in self.model.grid.get_neighbors(self.pos, True, self.range_view)
+                if isinstance(agent, Incendiary) and agent.condition == "Alive"
+            ]
+
+            if incendiaries:
+                # Captura o incendiário mais próximo
+                target = min(incendiaries, key=lambda x: self.distance(x.pos))
+                self.model.grid.move_agent(self, target.pos)  # Move até o incendiário
+                target.condition = "Captured"
+            else:
+                # Movimento aleatório se nenhum incendiário for encontrado
+                next_moves = self.model.grid.get_neighborhood(self.pos, True, False)
+                self.model.grid.move_agent(self, self.random.choice(next_moves))
+
+    def distance(self, target_pos):
+        """
+        Calcula a distância euclidiana para um alvo.
+        """
+        x1, y1 = self.pos
+        x2, y2 = target_pos
+        return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5

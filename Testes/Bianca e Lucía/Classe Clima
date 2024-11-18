@@ -114,3 +114,43 @@ class Clima(mesa.Agent): #classe que representa o tempo na região do modelo.
 
                     self.pressao += random.uniform(-5.0, 5.0)
                     self.pressao = max(900, min(1050, self.pressao))
+
+class Chuva(Clima):
+    def __init__(self, intensidade, frequencia=, pos, model, temperatura_cidade=28.0, temperatura_media=26.0, umidade_media=80.0, pressao_media=1013.25, precipitacao_media=5.0):
+      super().__init__(pos, model, temperatura_cidade, temperatura_media, umidade_media, pressao_media, precipitacao_media)
+      self.intensidade = intensidade
+      self.frequencia = frequencia
+
+    def step(self):
+      if random.random() < self.frequencia:
+          self.precipitacao = self.intensidade
+          self.umidade = min(100, self.umidade + random.uniform(5.0, 15.0))
+          self.temperatura = max(20.0, self.temperatura - random.uniform(1.0, 3.0))
+          self.pressao += random.uniform(0.0, 5.0)
+      else:
+          self.precipitacao = 0.0
+          self.umidade = max(0, self.umidade - random.uniform(0.5, 1.5))
+          self.temperatura -= random.uniform(1.0, 3.0)
+          self.pressao -= random.uniform(0.0, 1.5)
+
+      for agent in self.model.schedule.agents:
+          if isinstance(agent, TreeCell):
+              vizi_saudaveis = 0
+              vizi_chamas = 0
+              vizi_queimadas = 0
+
+              if agent.condition == "On Fire" and self.precipitacao > 0:
+                  for neighbor in self.model.grid.get_neighbors(agent.pos, moore=True, include_center=False):
+                      if neighbor.condition == "Fine":
+                          vizi_saudaveis += 1
+                      elif neighbor.condition == "On Fire":
+                          vizi_chamas += 1
+                      else:
+                          vizi_queimadas += 1
+
+                  if vizi_chamas > 4:
+                      agent.condition = "Burned Out"
+                  if vizi_saudaveis > 4:
+                      agent.condition = "Fine"
+                  if vizi_queimadas > 4:
+                      agent.condition = "Fine"

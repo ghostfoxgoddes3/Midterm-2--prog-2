@@ -31,7 +31,6 @@ class Clima(mesa.Agent): #classe que representa o tempo na região do modelo.
                 if isinstance(agent, TreeCell) and agent.condition == 'Fine':
                     agent.condition = 'On Fire'
 
-    @staticmethod
     def verificar_fogo(model):
         total_de_arvores = 0
         arvores_queimando = 0
@@ -48,7 +47,6 @@ class Clima(mesa.Agent): #classe que representa o tempo na região do modelo.
             porcentagem = 0
         return porcentagem
 
-    @staticmethod
     def verificar_queimadas(model):
         total_de_arvores = 0
         arvores_queimadas = 0

@@ -1,6 +1,6 @@
 import mesa
-from agent import TreeCell, CityCell  # Adicione CityCell na importação
-from model import ForestFire  # Certifique-se de importar o modelo correto
+from agent import TreeCell, CityCell  # Importando as classes TreeCell e CityCell
+from model import ForestFire  # Importando o modelo de incêndio florestal
 
 # Definindo as cores para as condições das células
 COLORS = {
@@ -50,9 +50,9 @@ model_params = {
     "width": 100,
     "density": mesa.visualization.Slider("Tree density", 0.65, 0.01, 1.0, 0.01),
     "city_probability": mesa.visualization.Slider("City Probability", 0.01, 0.0001, 0.05, 0.0001),
-    "prob_de_sobrevivencia": mesa.visualization.Slider("Survival Probability", 0.5, 0.01, 1.0, 0.01)
+    "prob_de_sobrevivencia": mesa.visualization.Slider("Survival Probability", 0.5, 0.01, 1.0, 0.01),
+    "vento": mesa.visualization.Choice("Wind Direction", value="Sem direção", choices=["Norte", "Sul", "Leste", "Oeste", "Sem direção"])
 }
-
 
 # Definindo o Canvas para a visualização do modelo
 canvas_element = mesa.visualization.CanvasGrid(

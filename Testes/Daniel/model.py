@@ -7,7 +7,7 @@ class ForestFire(mesa.Model):
     Simple Forest Fire model.
     """
 
-    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.5,num_pessoas=1, num_policiais=5, num_incendiarios=3):
+    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.5, num_policiais=5, num_incendiarios=3):
         """
         Create a new forest fire model.
 
@@ -40,14 +40,6 @@ class ForestFire(mesa.Model):
                     new_tree.condition = "On Fire"
                 self.grid.place_agent(new_tree, (x, y))
                 self.schedule.add(new_tree)
-
-        # Coloca bombeiros terrestres no grid
-        for _ in range(num_pessoas):
-            x = 99
-            y = self.random.randint(0, self.grid.height - 1)
-            new_person = GroundFirefighter((x, y), self)
-            self.grid.place_agent(new_person, (x, y))
-            self.schedule.add(new_person)
             
         # Coloca policiais no grid
         for _ in range(num_policiais):

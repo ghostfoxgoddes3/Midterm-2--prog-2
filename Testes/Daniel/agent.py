@@ -85,34 +85,6 @@ class Person(mesa.Agent):
                         self.condition = "Dead"  # A pessoa morre
                         break  # Não precisa continuar verificando
 
-#codigo da Fernanda
-class GroundFirefighter(Person):
-    def __init__(self, pos, model, resistencia_fogo=1.1, resistencia_fumaca=1.1):
-        super().__init__(pos, model)  # Chama o construtor da classe Person
-        self.special_skill = "Firefighting"
-        self.speed = 1
-        self.resistencia_fogo = resistencia_fogo
-        self.resistencia_fumaca = resistencia_fumaca
-
-    def step(self):
-        """Método para apagar fogo nas árvores próximas"""
-        # Verifica se há fogo na célula atual
-        current_cell = self.model.grid.get_cell_list_contents(self.pos)
-        tree = next((obj for obj in current_cell if isinstance(obj, TreeCell)), None)
-
-        if tree and tree.condition == "On Fire":
-            # Se há fogo na árvore, apaga
-            tree.condition = "Fire Off"
-        else:
-            # Mover em direção à árvore em chamas mais próxima
-            fire_positions = [
-                (agent.pos, agent) for agent in self.model.schedule.agents
-                if isinstance(agent, TreeCell) and agent.condition == "On Fire"
-            ]
-            if fire_positions:
-                # Escolher a árvore em chamas mais próxima
-                closest_fire = min(fire_positions, key=lambda f: ((self.pos[0] - f[0][0]) ** 2 + (self.pos[1] - f[0][1]) ** 2) ** 0.5)[0]
-                self.model.grid.move_agent(self, closest_fire)
 class Incendiary(Person):
     """
     Classe para representar um incendiário.

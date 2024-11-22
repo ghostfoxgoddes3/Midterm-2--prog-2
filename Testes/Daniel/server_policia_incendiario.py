@@ -1,5 +1,5 @@
 import mesa
-from model import ForestFire, TreeCell, GroundFirefighter, Police, Incendiary
+from model import ForestFire, TreeCell, Police, Incendiary
 
 # Cores para os diferentes estados e agentes
 COLORS = {
@@ -28,7 +28,7 @@ def forest_fire_portrayal(agent):
             "Filled": "true",
             "Color": COLORS["Police"],
             "Layer": 3,
-            "r": 0.5,  # Raio do círculo
+            "r": 1.5,  # Raio do círculo
         }
 
     # Incendiário
@@ -38,7 +38,7 @@ def forest_fire_portrayal(agent):
             "Filled": "true",
             "Color": COLORS["Incendiary"],
             "Layer": 3,
-            "r": 0.5,
+            "r": 1.5,
         }
 
     # Árvore

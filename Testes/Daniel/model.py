@@ -1,6 +1,6 @@
 import mesa
 #from mesa.time import BaseScheduler
-from agent import TreeCell, GroundFirefighter, Police, Incendiary
+from agent import TreeCell, Police, Incendiary
 
 class ForestFire(mesa.Model):
     """

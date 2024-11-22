@@ -11,13 +11,19 @@ class TreeCell(mesa.Agent):
         self.condition = "Fine"  # O estado inicial da árvore é 'Fine'
 
     def step(self):
-        """Espalha o fogo para as árvores vizinhas"""
-        if self.condition == "On Fire":
+        """Espalha o fogo para as árvores vizinhas."""
+        if self.condition == "Fire Off":
+            # Se o fogo foi apagado, a árvore não espalha mais fogo.
+            return
+
+        elif self.condition == "On Fire":
             # Espalha o fogo para vizinhos
-            for neighbor in self.model.grid.iter_neighbors(self.pos, True):
+            for neighbor in self.model.grid.iter_neighbors(self.pos, moore=True, include_center=False):
                 if isinstance(neighbor, TreeCell) and neighbor.condition == "Fine":
                     neighbor.condition = "On Fire"  # Torna o vizinho em chamas
             self.condition = "Burned Out"  # A árvore que pegou fogo se queima
+
+
 
 class Person(mesa.Agent):
     #Classe para as pessoas envolvidas na simulação
@@ -62,6 +68,8 @@ class Person(mesa.Agent):
                         self.condition = "Dead"  # A pessoa morre
                         break  # Não precisa continuar verificando
          
+from collections import deque
+
 class GroundFirefighter(Person):
     def __init__(self, pos, model, resistencia_fogo=1, resistencia_fumaca=1):
         super().__init__(pos, model)  # Chama o construtor da classe Person
@@ -72,49 +80,45 @@ class GroundFirefighter(Person):
         self.target_path = []  # Caminho até o próximo fogo
 
     def step(self):
-        # Verifica se há fogo na célula atual
         current_cell = self.model.grid.get_cell_list_contents(self.pos)
         tree = next((obj for obj in current_cell if isinstance(obj, TreeCell)), None)
 
         if tree and (tree.condition == "On Fire" or tree.condition == "Burned Out"):
-            # Se há fogo na árvore, apaga
-            tree.condition = "Fire Off"
+            tree.condition = "Fire Off" # Apaga o fogo
             self.target_path = []  # Limpa o caminho após apagar o fogo
         elif not self.target_path:
             # Se não tem caminho, encontra um novo caminho até o fogo
-            self.target_path = self.find_path_to_fire(self.pos, visited=set())
+            self.target_path = self.find_path_to_fire(self.pos)
         if self.target_path:
             # Move para o próximo passo no caminho
             next_step = self.target_path.pop(0)
             self.model.grid.move_agent(self, next_step)
 
-    def find_path_to_fire(self, current_pos, visited):
-        """Busca recursiva para encontrar o menor caminho até uma célula com fogo."""
-        # Evita ciclos
-        if current_pos in visited:
-            return None
-        visited.add(current_pos)
+    def find_path_to_fire(self, start_pos):
+        """Busca em largura (BFS) para encontrar o menor caminho até uma célula com fogo."""
+        queue = deque([(start_pos, [])])  # Fila de posições a serem exploradas e o caminho até elas
+        visited = set()  # Conjunto de posições visitadas
 
-        # Verifica se há fogo na célula atual
-        current_cell = self.model.grid.get_cell_list_contents(current_pos)
-        tree = next((obj for obj in current_cell if isinstance(obj, TreeCell)), None)
+        while queue:
+            current_pos, path = queue.popleft()
 
-        if tree and tree.condition == "On Fire":
-            return [current_pos]  # Retorna o caminho com a célula atual
+            # Evita revisitar células
+            if current_pos in visited:
+                continue
+            visited.add(current_pos)
 
-        # Explora os vizinhos ortogonais
-        neighbors = self.model.grid.get_neighborhood(current_pos, moore=False, include_center=False)
-        for neighbor in neighbors:
-            path = self.find_path_to_fire(neighbor, visited)
-            if path:
-                return [current_pos] + path  # Constrói o caminho recursivamente
+            current_cell = self.model.grid.get_cell_list_contents(current_pos)
+            tree = next((obj for obj in current_cell if isinstance(obj, TreeCell)), None)
 
-        return None  # Não encontrou fogo
+            if tree and tree.condition == "On Fire":
+                return path + [current_pos]  # Retorna o caminho até a célula com fogo
 
-    def explore_randomly(self):
-        """Move aleatoriamente, mas evita áreas já exploradas."""
-        possible_steps = self.model.grid.get_neighborhood(self.pos, moore=True, include_center=False)
-        # Move aleatoriamente para um vizinho
-        new_position = random.choice(possible_steps)
-        self.model.grid.move_agent(self, new_position)
+            # Explora os vizinhos ortogonais
+            neighbors = self.model.grid.get_neighborhood(current_pos, moore=False, include_center=False)
+            for neighbor in neighbors:
+                if neighbor not in visited:
+                    queue.append((neighbor, path + [current_pos]))
+
+        return []  # Retorna caminho vazio se não encontrar fogo
+
 

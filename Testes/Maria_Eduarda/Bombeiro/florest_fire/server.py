@@ -25,12 +25,11 @@ def forest_fire_portrayal(agent):
     if isinstance(agent, GroundFirefighter):
         # Representação para o bombeiro terrestre
         portrayal = {
-            "Shape": "rect",  # Forma retangular das células
+            "Shape": "circle",  # Forma retangular das células
             "Filled": "true",
             "Color": COLORS["GroundFirefighter"],  # Cor do bombeiro
             "Layer": 1,  # Camada do bombeiro
-            "w": 1,  # Largura da célula
-            "h": 1  # Altura da célula
+            "r": 0.8
         }
 
             

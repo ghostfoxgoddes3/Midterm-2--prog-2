@@ -1,6 +1,6 @@
 import mesa
-from agente3 import TreeCell, CityCell, GrassCell  # Importando as classes TreeCell, CityCell e GrassCell
-from model3 import ForestFire  # Importando o modelo de incêndio florestal 
+from agent import TreeCell, CityCell, GrassCell  # Importando as classes TreeCell, CityCell e GrassCell
+from model import ForestFire  # Importando o modelo de incêndio florestal 
 
 # Definindo as cores para as condições das células
 COLORS = {

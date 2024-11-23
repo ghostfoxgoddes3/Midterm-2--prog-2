@@ -1,123 +1,225 @@
 import mesa
+import math
 import random
+from collections import deque
+
 
 class TreeCell(mesa.Agent):
     """
-    A tree cell.
+    A tree in the forest.
+    A árvore da floresta, com a probabilidade de sobrevivência e influência do vento.
     """
+
+    def __init__(self, pos, model, prob_de_sobrevivencia):
+        """
+        Cria uma nova árvore com uma dada probabilidade de sobrevivência.
+        Args:
+            pos: Coordenadas da árvore na grade.
+            model: Referência do modelo padrão para o agente.
+            prob_de_sobrevivencia: Probabilidade de a árvore sobreviver ao fogo.
+        """
+        super().__init__(pos, model)
+        self.pos = pos
+        self.model = model
+        self.condition = "Fine"  # Possíveis condições: "Fine", "On Fire", "Burned Out"
+        self.prob_de_sobrevivencia = prob_de_sobrevivencia  # Atributo de probabilidade de sobrevivência
+
+    def ajusta_probabilidade_por_vento(self, neighbor_pos):
+        """
+        Ajusta a probabilidade de sobrevivência com base na direção do vento.
+        Args:
+            neighbor_pos: A posição do vizinho.
+        Returns:
+            nova_probabilidade: A probabilidade ajustada considerando o vento.
+        """
+        if self.model.vento == "Sem Direção":
+            return self.prob_de_sobrevivencia  # Sem alteração na probabilidade se o vento não tiver direção
+
+        # Define um aumento da chance de pegar fogo se o vento estiver na direção certa
+        if self.model.vento in ["Norte", "Sul"]:
+            incremento_vento = 0.7
+        else:
+            incremento_vento = 0.5
+
+        # Calcular a direção do vento e ajustar a probabilidade de pegar fogo
+        if self.model.vento == "Norte" and neighbor_pos[1] < self.pos[1]:  # Vento vindo do Norte
+            return max(0, self.prob_de_sobrevivencia - incremento_vento)
+        elif self.model.vento == "Sul" and neighbor_pos[1] > self.pos[1]:  # Vento vindo do Sul
+            return max(0, self.prob_de_sobrevivencia - incremento_vento)
+        elif self.model.vento == "Leste" and neighbor_pos[0] < self.pos[0]:  # Vento vindo do Leste
+            return max(0, self.prob_de_sobrevivencia - incremento_vento)
+        elif self.model.vento == "Oeste" and neighbor_pos[0] > self.pos[0]:  # Vento vindo do Oeste
+            return max(0, self.prob_de_sobrevivencia - incremento_vento)
+        
+        # Se o vento não está na direção certa, a probabilidade de sobrevivência não é ajustada
+        return self.prob_de_sobrevivencia
+
+    def step(self):
+        """
+        Se a árvore estiver pegando fogo, espalha-o para árvores próximas, considerando o vento.
+        """
+        if self.condition == "On Fire":
+            for neighbor in self.model.grid.get_neighbors(self.pos, moore=True, include_center=False):
+                if neighbor.condition == "Fine":
+                    # Ajustar a probabilidade com base no vento
+                    probabilidade_ajustada = neighbor.ajusta_probabilidade_por_vento(self.pos)
+                    
+                    # Verificar probabilidade ajustada para pegar fogo
+                    random_value = self.random.random()
+
+                    if random_value > probabilidade_ajustada:
+                        neighbor.condition = "On Fire"
+            # Alterar a condição da árvore para "Burned Out"
+            self.condition = "Burned Out"
+        else:
+            print(f"Tree at {self.pos} is in state: {self.condition}")
+
+    def in_bounds(self, pos):
+        """
+        Verifica se a posição fornecida está dentro dos limites da grade.
+        """
+        x, y = pos
+        return 0 <= x < self.model.grid.width and 0 <= y < self.model.grid.height
+
+
+class CityCell(mesa.Agent):
+    """
+    A cidade na floresta, com alerta de evacuação baseado no fogo.
+    """
+
+    def __init__(self, pos, model, condition="City"):
+        super().__init__(pos, model)
+        self.pos = pos
+        self.condition = "City"  # Condições possíveis: "City", "Evacuated"
+        self.alert = False  # Flag para indicar o alerta de evacuação
+
+    def step(self):
+        # Alerta de evacuação para as cidades dentro do raio de 10 células
+        if self.condition == "City":
+            for x in range(self.pos[0] - 10, self.pos[0] + 11):
+                for y in range(self.pos[1] - 10, self.pos[1] + 11):
+                    # Ignorar a célula da cidade ou fora dos limites
+                    if (x, y) == self.pos or not (0 <= x < self.model.grid.width and 0 <= y < self.model.grid.height):
+                        continue
+                    # Calcular a distância entre as células
+                    distance = math.sqrt((self.pos[0] - x) ** 2 + (self.pos[1] - y) ** 2)
+                    # Se o fogo está dentro do raio e encontrou uma célula em chamas, evacuar
+                    if distance <= 10:
+                        neighbor = self.model.grid.get_cell_list_contents([(x, y)])
+                        for n in neighbor:
+                            if n.condition == "On Fire":
+                                self.alert = True
+                                self.condition = "Evacuated"  # Evacuar a cidade
+                                return
+
+    def in_bounds(self, pos):
+        """
+        Verifica se a posição fornecida está dentro dos limites da grade.
+        """
+        x, y = pos
+        return 0 <= x < self.model.grid.width and 0 <= y < self.model.grid.height
+
+class GrassCell(mesa.Agent):
     def __init__(self, pos, model):
         super().__init__(pos, model)
         self.pos = pos
-        self.condition = "Fine"  # O estado inicial da árvore é 'Fine'
+        self.condition = "Fine"  # "Fine", "On Fire", "Burned Out"
 
+    def ajusta_probabilidade_por_vento(self, neighbor_pos):
+        #funçao nao utilizada diretamente, apenas para o codigo rodar        
+        return 0.1
     def step(self):
-        """Espalha o fogo para as árvores vizinhas"""
-        if self.condition == "On Fire":
-            # Espalha o fogo para vizinhos
-            for neighbor in self.model.grid.iter_neighbors(self.pos, True):
-                if isinstance(neighbor, TreeCell) and neighbor.condition == "Fine":
-                    neighbor.condition = "On Fire"  # Torna o vizinho em chamas
-            self.condition = "Burned Out"  # A árvore que pegou fogo se queima
+            if self.condition == "On Fire":
+                for neighbor in self.model.grid.get_neighbors(self.pos, moore=True, include_center=False):
+                    if neighbor.condition == "Fine" :
+                        if self.random.random() < 0.15:    #prob. arbitraria para queimar os vizinhos
+                            neighbor.condition = "On Fire"
+                self.condition = "Burned Out"
 
 class Person(mesa.Agent):
-    #Classe para as pessoas envolvidas na simulação
-    def __init__(self, pos, model, resistencia_fogo = 0, resistencia_fumaca = 0.5):
-        """
-        Cria pessoas
-        Args:
-            pos: coordenada atual da pessoa no grid.
-            model: standard model reference for agent.
-        """
+    """Classe base para as pessoas na simulação."""
+    def __init__(self, pos, model, resistencia_fogo=0, resistencia_fumaca=0.5):
         super().__init__(pos, model)
         self.pos = pos
-        self.condition = "Alive" #condição viva ou morta
-        self.speed = 1  # Velocidade da pessoa
-        self.fire_resistance = resistencia_fogo  # Resistência da pessoa ao fogo
-        self.smoke_resistance = resistencia_fumaca  # Resistência da pessoa aa fumaça (fogo em áreas vizinhas)
+        self.condition = "Alive"
+        self.fire_resistance = resistencia_fogo
+        self.smoke_resistance = resistencia_fumaca
 
     def step(self):
-        """
-        Se a pessoa está numa área que está pegando fogo, ela pode morrer.
-        """
-
+        """Atualiza o estado da pessoa, verificando os perigos do fogo."""
         if self.condition == "Alive":
-            #self.condition = "Dead"
-            # Verificando se a própria posição da pessoa está pegando fogo
             current_cell = self.model.grid.get_cell_list_contents([self.pos])
 
-            if any([agent.condition == "On Fire" or agent.condition == "Burned Out" for agent in current_cell]): #True
-                    if self.fire_resistance == 0:
-                        self.condition = "Dead"
-                    # Check survival probability
-                    if self.random.random() > self.fire_resistance: # Se a pessoa não sobrevive ao fogo
-                        self.condition = "Dead" #morreu
-                        return #não precisa continuar executando o método
-                    #Se não caiu no IF anterior, é porque está viva e reperte o loop
+            # Verifica se a célula atual tem fogo
+            if any(agent.condition in ["On Fire", "Burned Out"] for agent in current_cell):
+                if self.random.random() > self.fire_resistance:
+                    self.condition = "Dead"
+                    return
 
-            # Verificando os vizinhos da pessoa (onde o fogo pode se espalhar)
-            for neighbor in self.model.grid.iter_neighbors(self.pos, True):
-                if neighbor.condition == "On Fire":
-                    # Verificar se a pessoa morre ou sobrevive ao fogo
+            # Verifica os vizinhos para risco de fumaça
+            for neighbor in self.model.grid.iter_neighbors(self.pos, moore=True):
+                if isinstance(neighbor, TreeCell) and neighbor.condition == "On Fire":
                     if self.random.random() > self.smoke_resistance:
-                        self.condition = "Dead"  # A pessoa morre
-                        break  # Não precisa continuar verificando
-         
+                        self.condition = "Dead"
+                        break
+
+
 class GroundFirefighter(Person):
-    def __init__(self, pos, model, resistencia_fogo=1, resistencia_fumaca=1, search_radius=25):
-        super().__init__(pos, model)  # Chama o construtor da classe Person
-        self.special_skill = "Firefighting"
-        self.speed = 1
-        self.resistencia_fogo = resistencia_fogo
-        self.resistencia_fumaca = resistencia_fumaca
-        self.search_radius = search_radius  # Raio de detecção do fogo
-        self.visited_positions = set()  # Armazena posições visitadas recentemente
+    """Representa um bombeiro terrestre."""
+    def __init__(self, pos, model, resistencia_fogo=1, resistencia_fumaca=1):
+        super().__init__(pos, model, resistencia_fogo, resistencia_fumaca)
+
+    def find_path_to_fire(self, start_pos):
+        """Busca em largura (BFS) para encontrar o menor caminho até o fogo."""
+        queue = deque([start_pos])  # Fila de posições a explorar
+        visited = set()  # Conjunto de posições visitadas
+
+        while queue:
+            current_pos = queue.popleft()
+            if current_pos in visited:
+                continue
+            visited.add(current_pos)
+
+            # Verifica os agentes na célula
+            cell_contents = self.model.grid.get_cell_list_contents([current_pos])
+            if any(isinstance(agent, TreeCell) and agent.condition == "On Fire" for agent in cell_contents):
+                return current_pos
+
+            # Adiciona vizinhos à fila
+            neighbors = self.model.grid.get_neighborhood(current_pos, moore=True, include_center=False)
+            queue.extend(neighbor for neighbor in neighbors if neighbor not in visited)
+
+        return None  # Retorna None se nenhum fogo for encontrado
 
     def step(self):
-        # Verifica se há fogo na célula atual
-        current_cell = self.model.grid.get_cell_list_contents(self.pos)
+        """Move o bombeiro em direção ao fogo e apaga-o se estiver na mesma célula."""
+        # Atualiza ou encontra o caminho até o fogo
+       
+        self.target_pos = self.find_path_to_fire(self.pos)
+
+        # Move-se passo a passo em direção ao alvo
+        if self.target_pos:
+            x, y = self.pos
+            x_ALVO, y_ALVO = self.target_pos
+
+            # Calcula o deslocamento horizontal e vertical
+            new_x = x + (1 if x_ALVO > x else -1 if x_ALVO < x else 0)
+            new_y = y + (1 if y_ALVO > y else -1 if y_ALVO < y else 0)
+            nova_pos = (new_x, new_y)
+
+            # Move o agente se a nova posição estiver dentro do grid
+            if not self.model.grid.out_of_bounds(nova_pos):
+                self.model.grid.move_agent(self, nova_pos)
+
+            # Se chegou no alvo, reseta o alvo
+            '''if nova_pos == self.target_pos:
+                self.target_pos = None'''
+
+        # Verifica e apaga o fogo na célula atual
+        current_cell = self.model.grid.get_cell_list_contents([self.pos])
         tree = next((obj for obj in current_cell if isinstance(obj, TreeCell)), None)
 
         if tree and tree.condition == "On Fire":
-            # Se há fogo na árvore, apaga
-            tree.condition = "Fire Off"
-        else:
-            # Lista todas as árvores em chamas
-            fire_positions = [
-                (agent.pos, agent) for agent in self.model.schedule.agents
-                if isinstance(agent, TreeCell) and agent.condition == "On Fire"
-            ]
+            tree.condition = "Fire Off"  # Apaga o fogo
+            self.target_pos = None  # Reseta o alvo após apagar o fogo
 
-            # Verifica se há árvores em chamas próximas (dentro do raio de busca)
-            close_fires = [
-                (pos, agent) for pos, agent in fire_positions
-                if ((self.pos[0] - pos[0]) ** 2 + (self.pos[1] - pos[1]) ** 2) ** 0.5 <= self.search_radius
-            ]
-
-            if close_fires:
-                # Se há fogo próximo, move em direção à árvore em chamas mais próxima
-                closest_fire = min(close_fires, key=lambda f: ((self.pos[0] - f[0][0]) ** 2 + (self.pos[1] - f[0][1]) ** 2) ** 0.5)[0]
-                self.model.grid.move_agent(self, closest_fire)
-            else:
-                # Movimento mais diversificado
-                self.explore_randomly()
-
-    def explore_randomly(self):
-        """Move aleatoriamente, mas evita áreas já exploradas."""
-        possible_steps = self.model.grid.get_neighborhood(self.pos, moore=True, include_center=False)
-        # Filtra posições já visitadas
-        unexplored_steps = [pos for pos in possible_steps if pos not in self.visited_positions]
-
-        if unexplored_steps:
-            new_position = random.choice(unexplored_steps)
-        else:
-            # Se todos os vizinhos já foram explorados, escolhe aleatoriamente
-            new_position = random.choice(possible_steps)
-
-        # Adiciona a nova posição à lista de visitados
-        self.visited_positions.add(new_position)
-        # Limita o tamanho da memória
-        if len(self.visited_positions) > 100:
-            self.visited_positions.pop()
-
-        # Move para a nova posição
-        self.model.grid.move_agent(self, new_position)

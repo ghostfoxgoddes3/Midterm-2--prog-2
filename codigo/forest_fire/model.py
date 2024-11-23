@@ -35,7 +35,7 @@ class ForestFire(mesa.Model):
                 self.grid.place_agent(city, (x, y))
                 self.schedule.add(city)
             
-            elif self.random.random() < grass_probability:  # Criando células de grama
+            elif self.random.random() < grass_probability:  
                 grass = GrassCell((x, y), self)
                 self.grid.place_agent(grass, (x, y))
                 self.schedule.add(grass)

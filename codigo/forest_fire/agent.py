@@ -124,12 +124,12 @@ class GrassCell(mesa.Agent):
         self.condition = "Fine"  # "Fine", "On Fire", "Burned Out"
 
     def ajusta_probabilidade_por_vento(self, neighbor_pos):
-        #funçao nao utilizada diretamente        
+        #funçao nao utilizada diretamente, apenas para o codigo rodar        
         return 0.1
     def step(self):
             if self.condition == "On Fire":
                 for neighbor in self.model.grid.get_neighbors(self.pos, moore=True, include_center=False):
                     if neighbor.condition == "Fine" :
-                        if self.random.random() < 0.15:
+                        if self.random.random() < 0.15:    #prob. arbitraria para queimar os vizinhos
                             neighbor.condition = "On Fire"
                 self.condition = "Burned Out"

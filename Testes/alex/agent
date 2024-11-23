@@ -1,1 +1,140 @@
+import mesa
+import math
+
+
+class TreeCell(mesa.Agent):
+    """
+    A tree in the forest.
+    A árvore da floresta, com a probabilidade de sobrevivência e influência do vento.
+    """
+
+    def __init__(self, pos, model, prob_de_sobrevivencia):
+        """
+        Cria uma nova árvore com uma dada probabilidade de sobrevivência.
+        Args:
+            pos: Coordenadas da árvore na grade.
+            model: Referência do modelo padrão para o agente.
+            prob_de_sobrevivencia: Probabilidade de a árvore sobreviver ao fogo.
+        """
+        super().__init__(pos, model)
+        self.pos = pos
+        self.model = model
+        self.condition = "Fine"  # Possíveis condições: "Fine", "On Fire", "Burned Out"
+        self.prob_de_sobrevivencia = prob_de_sobrevivencia  # Atributo de probabilidade de sobrevivência
+
+    def ajusta_probabilidade_por_vento(self, neighbor_pos):
+        """
+        Ajusta a probabilidade de sobrevivência com base na direção do vento.
+        Args:
+            neighbor_pos: A posição do vizinho.
+        Returns:
+            nova_probabilidade: A probabilidade ajustada considerando o vento.
+        """
+        if self.model.vento == "Sem Direção":
+            return self.prob_de_sobrevivencia  # Sem alteração na probabilidade se o vento não tiver direção
+
+        # Define um aumento da chance de pegar fogo se o vento estiver na direção certa
+        if self.model.vento in ["Norte", "Sul"]:
+            incremento_vento = 0.7
+        else:
+            incremento_vento = 0.5
+
+        # Calcular a direção do vento e ajustar a probabilidade de pegar fogo
+        if self.model.vento == "Norte" and neighbor_pos[1] < self.pos[1]:  # Vento vindo do Norte
+            return max(0, self.prob_de_sobrevivencia - incremento_vento)
+        elif self.model.vento == "Sul" and neighbor_pos[1] > self.pos[1]:  # Vento vindo do Sul
+            return max(0, self.prob_de_sobrevivencia - incremento_vento)
+        elif self.model.vento == "Leste" and neighbor_pos[0] < self.pos[0]:  # Vento vindo do Leste
+            return max(0, self.prob_de_sobrevivencia - incremento_vento)
+        elif self.model.vento == "Oeste" and neighbor_pos[0] > self.pos[0]:  # Vento vindo do Oeste
+            return max(0, self.prob_de_sobrevivencia - incremento_vento)
+        
+        # Se o vento não está na direção certa, a probabilidade de sobrevivência não é ajustada
+        return self.prob_de_sobrevivencia
+
+    def step(self):
+        """
+        Se a árvore estiver pegando fogo, espalha-o para árvores próximas, considerando o vento.
+        """
+        if self.condition == "On Fire":
+            for neighbor in self.model.grid.get_neighbors(self.pos, moore=True, include_center=False):
+                if neighbor.condition == "Fine":
+                    # Ajustar a probabilidade com base no vento
+                    probabilidade_ajustada = neighbor.ajusta_probabilidade_por_vento(self.pos)
+                    
+                    # Verificar probabilidade ajustada para pegar fogo
+                    random_value = self.random.random()
+
+                    if random_value > probabilidade_ajustada:
+                        neighbor.condition = "On Fire"
+            # Alterar a condição da árvore para "Burned Out"
+            self.condition = "Burned Out"
+        else:
+            print(f"Tree at {self.pos} is in state: {self.condition}")
+
+    def in_bounds(self, pos):
+        """
+        Verifica se a posição fornecida está dentro dos limites da grade.
+        """
+        x, y = pos
+        return 0 <= x < self.model.grid.width and 0 <= y < self.model.grid.height
+
+
+class CityCell(mesa.Agent):
+    """
+    A cidade na floresta, com alerta de evacuação baseado no fogo.
+    """
+
+    def __init__(self, pos, model, condition="City"):
+        super().__init__(pos, model)
+        self.pos = pos
+        self.condition = "City"  # Condições possíveis: "City", "Evacuated"
+        self.alert = False  # Flag para indicar o alerta de evacuação
+
+    def step(self):
+        # Alerta de evacuação para as cidades dentro do raio de 10 células
+        if self.condition == "City":
+            for x in range(self.pos[0] - 10, self.pos[0] + 11):
+                for y in range(self.pos[1] - 10, self.pos[1] + 11):
+                    # Ignorar a célula da cidade ou fora dos limites
+                    if (x, y) == self.pos or not (0 <= x < self.model.grid.width and 0 <= y < self.model.grid.height):
+                        continue
+                    # Calcular a distância entre as células
+                    distance = math.sqrt((self.pos[0] - x) ** 2 + (self.pos[1] - y) ** 2)
+                    # Se o fogo está dentro do raio e encontrou uma célula em chamas, evacuar
+                    if distance <= 10:
+                        neighbor = self.model.grid.get_cell_list_contents([(x, y)])
+                        for n in neighbor:
+                            if n.condition == "On Fire":
+                                self.alert = True
+                                self.condition = "Evacuated"  # Evacuar a cidade
+                                return
+
+    def in_bounds(self, pos):
+        """
+        Verifica se a posição fornecida está dentro dos limites da grade.
+        """
+        x, y = pos
+        return 0 <= x < self.model.grid.width and 0 <= y < self.model.grid.height
+
+class GrassCell(mesa.Agent):
+    def __init__(self, pos, model):
+        super().__init__(pos, model)
+        self.pos = pos
+        self.condition = "Fine"  # "Fine", "On Fire", "Burned Out"
+
+    def ajusta_probabilidade_por_vento(self, neighbor_pos):
+        """
+        Ajusta a probabilidade de sobrevivência do mato com base na direção do vento.
+        """
+        
+        return 0.5
+    def step(self):
+            if self.condition == "On Fire":
+                for neighbor in self.model.grid.get_neighbors(self.pos, moore=True, include_center=False):
+                    if neighbor.condition == "Fine":
+                        probabilidade_ajustada = neighbor.ajusta_probabilidade_por_vento(self.pos)
+                        if self.random.random() < probabilidade_ajustada:
+                            neighbor.condition = "On Fire"
+                self.condition = "Burned Out"
 

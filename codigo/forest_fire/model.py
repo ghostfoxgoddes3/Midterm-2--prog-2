@@ -1,56 +1,44 @@
 import mesa
 import math
-from agent import TreeCell, CityCell  # Importando as classes TreeCell e CityCell
+from agente3 import TreeCell, CityCell, GrassCell  # Certifique-se de que GrassCell seja importado
+
 
 class ForestFire(mesa.Model):
-    """
-    Modelo de incêndio florestal com árvores e cidades.
-    """
-
-    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.0, vento="Norte", city_probability=0.01):
-        """
-        Cria um novo modelo de incêndio florestal com árvores e cidades.
-
-        Args:
-            width, height: O tamanho da grade para modelar
-            density: A fração de células com árvores
-            prob_de_sobrevivencia: A probabilidade de uma árvore sobreviver ao fogo
-            vento: A direção do vento (Norte, Sul, Leste, Oeste)
-            city_probability: A probabilidade de uma célula ser uma cidade
-        """
+    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.0, vento="Norte", city_probability=0.01, grass_probability=0.05):
         super().__init__()
 
-        # Configura objetos do modelo
         self.schedule = mesa.time.RandomActivation(self)
         self.grid = mesa.space.MultiGrid(width, height, torus=False)
-        self.prob_de_sobrevivencia = prob_de_sobrevivencia  # Probabilidade de sobrevivência das árvores
-        self.vento = vento  # Direção do vento no modelo
+        self.prob_de_sobrevivencia = prob_de_sobrevivencia
+        self.vento = vento
 
         self.datacollector = mesa.DataCollector(
             {
                 "Fine": lambda m: self.count_type(m, "Fine"),
                 "On Fire": lambda m: self.count_type(m, "On Fire"),
                 "Burned Out": lambda m: self.count_type(m, "Burned Out"),
-                "Cities Evacuated": lambda m: self.count_type(m, "Evacuated"),  # Contando cidades evacuadas
+                "Cities Evacuated": lambda m: self.count_type(m, "Evacuated"),
             }
         )
 
-        # Coloca árvores e cidades nas células
+        # Criando agentes no grid
         for contents, (x, y) in self.grid.coord_iter():
             if self.random.random() < density:
-                # Cria uma árvore com a probabilidade de sobrevivência
-                new_tree = TreeCell((x, y), self, self.prob_de_sobrevivencia, vento=self.vento)
-                # Define todas as árvores da primeira coluna como "On Fire"
-                if x == 0:
+                new_tree = TreeCell((x, y), self, self.prob_de_sobrevivencia)
+                if x == 0:  # Vamos começar o fogo na posição (0, y)
                     new_tree.condition = "On Fire"
                 self.grid.place_agent(new_tree, (x, y))
                 self.schedule.add(new_tree)
 
-            # Cria cidades com base na probabilidade
             elif self.random.random() < city_probability:
                 city = CityCell((x, y), self)
                 self.grid.place_agent(city, (x, y))
                 self.schedule.add(city)
+            
+            elif self.random.random() < grass_probability:  # Criando células de grama
+                grass = GrassCell((x, y), self)
+                self.grid.place_agent(grass, (x, y))
+                self.schedule.add(grass)
 
         self.running = True
         self.datacollector.collect(self)
@@ -69,20 +57,19 @@ class ForestFire(mesa.Model):
 
     @staticmethod
     def count_type(model, condition):
-        """
-        Método auxiliar para contar agentes em uma dada condição no modelo.
-        """
         count = 0
         for agent in model.schedule.agents:
             if isinstance(agent, TreeCell) and agent.condition == condition:
                 count += 1
             elif isinstance(agent, CityCell) and agent.condition == condition:
                 count += 1
+            elif isinstance(agent,GrassCell) and agent.condition == condition:
+                count +=1
         return count
 
-# Definição de TreeCell
+
 class TreeCell(mesa.Agent):
-    def __init__(self, pos, model, prob_de_sobrevivencia, vento="Norte"):
+    def __init__(self, pos, model, prob_de_sobrevivencia):
         """
         Cria uma nova árvore com uma dada probabilidade de sobrevivência.
 
@@ -90,13 +77,11 @@ class TreeCell(mesa.Agent):
             pos: Coordenadas da árvore na grade.
             model: Referência do modelo padrão para o agente.
             prob_de_sobrevivencia: Probabilidade de a árvore sobreviver ao fogo.
-            vento: Direção do vento que afeta a propagação do fogo.
         """
         super().__init__(pos, model)
         self.pos = pos
         self.condition = "Fine"
         self.prob_de_sobrevivencia = prob_de_sobrevivencia
-        self.vento = vento  # Direção do vento
 
     def ajusta_probabilidade_por_vento(self, neighbor_pos):
         """
@@ -135,15 +120,12 @@ class TreeCell(mesa.Agent):
 
     def step(self):
         """
-        Se a árvore estiver pegando fogo, espalha-o para árvores próximas, considerando o vento.
+        Executa um passo no modelo, espalhando o fogo, se aplicável.
         """
         if self.condition == "On Fire":
             for neighbor in self.model.grid.get_neighbors(self.pos, moore=True, include_center=False):
-                if neighbor.condition == "Fine":
-                    # Ajustar a probabilidade com base no vento
+                if isinstance(neighbor, (TreeCell, GrassCell)) and neighbor.condition == "Fine":  # Inclui árvores e mato
                     probabilidade_ajustada = neighbor.ajusta_probabilidade_por_vento(self.pos)
-                    
-                    # Verificar probabilidade ajustada para pegar fogo
                     if self.random.random() > probabilidade_ajustada:
                         neighbor.condition = "On Fire"
             # Alterar a condição da árvore para "Burned Out"

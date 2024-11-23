@@ -34,12 +34,10 @@ class TreeCell(mesa.Agent):
             return self.prob_de_sobrevivencia  # Sem alteração na probabilidade se o vento não tiver direção
 
         # Define um aumento da chance de pegar fogo se o vento estiver na direção certa
-        if self.model.vento == "Norte":
-            incremento_vento = 0.7  # Aumenta o impacto do vento Norte
-        elif self.model.vento == "Sul":
-            incremento_vento = 0.7  # Aumenta o impacto do vento Sul
+        if self.model.vento in ["Norte", "Sul"]:
+            incremento_vento = 0.7
         else:
-            incremento_vento = 0.5  # Para Leste/Oeste, o impacto é um pouco menor
+            incremento_vento = 0.5
 
         # Calcular a direção do vento e ajustar a probabilidade de pegar fogo
         if self.model.vento == "Norte" and neighbor_pos[1] < self.pos[1]:  # Vento vindo do Norte
@@ -118,3 +116,20 @@ class CityCell(mesa.Agent):
         """
         x, y = pos
         return 0 <= x < self.model.grid.width and 0 <= y < self.model.grid.height
+
+class GrassCell(mesa.Agent):
+    def __init__(self, pos, model):
+        super().__init__(pos, model)
+        self.pos = pos
+        self.condition = "Fine"  # "Fine", "On Fire", "Burned Out"
+
+    def ajusta_probabilidade_por_vento(self, neighbor_pos):
+        #funçao nao utilizada diretamente        
+        return 0.1
+    def step(self):
+            if self.condition == "On Fire":
+                for neighbor in self.model.grid.get_neighbors(self.pos, moore=True, include_center=False):
+                    if neighbor.condition == "Fine" :
+                        if self.random.random() < 0.15:
+                            neighbor.condition = "On Fire"
+                self.condition = "Burned Out"

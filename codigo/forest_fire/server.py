@@ -71,6 +71,7 @@ tree_chart = mesa.visualization.ChartModule(
         {"Label": "Fine", "Color": COLORS["Fine"]},
         {"Label": "On Fire", "Color": COLORS["On Fire"]},
         {"Label": "Burned Out", "Color": COLORS["Burned Out"]},
+        {"Label": "Fire Off", "Color": COLORS["Fire Off"]},
     ]
 )
 
@@ -80,6 +81,7 @@ pie_chart = mesa.visualization.PieChartModule(
         {"Label": "Fine", "Color": COLORS["Fine"]},
         {"Label": "On Fire", "Color": COLORS["On Fire"]},
         {"Label": "Burned Out", "Color": COLORS["Burned Out"]},
+        {"Label": "Fire Off", "Color": COLORS["Fire Off"]},
     ]
 )
 
@@ -87,12 +89,12 @@ pie_chart = mesa.visualization.PieChartModule(
 model_params = {
     "height": 100,
     "width": 100,
-    "density": mesa.visualization.Slider("Tree density", 0.65, 0.01, 1.0, 0.01),
-    "city_probability": mesa.visualization.Slider("City Probability", 0.01, 0.0001, 0.05, 0.0001),
-    "grass_probability": mesa.visualization.Slider("Grass Probability", 0.5, 0.01, 1.0, 0.01),
-    "prob_de_sobrevivencia": mesa.visualization.Slider("Survival Probability", 0.5, 0.01, 1.0, 0.01),
-    "vento": mesa.visualization.Choice("Wind Direction", value="Sem direção", choices=["Norte", "Sul", "Leste", "Oeste", "Sem direção"]),
-    "num_pessoas": mesa.visualization.Slider("Number of fire fighters", 10, 0, 50, 1),
+    "density": mesa.visualization.Slider("Densidade de Árvore", 0.65, 0.01, 1.0, 0.01),
+    "city_probability": mesa.visualization.Slider("Densidade de Cidades", 0.01, 0.0001, 0.05, 0.0001),
+    "grass_probability": mesa.visualization.Slider("Sobrevivência da grama", 0.5, 0.01, 1.0, 0.01),
+    "prob_de_sobrevivencia": mesa.visualization.Slider("Resistência da árvore ao fogo", 0.5, 0.01, 1.0, 0.01),
+    "vento": mesa.visualization.Choice("Direção do vento", value="Sem direção", choices=["Norte", "Sul", "Leste", "Oeste", "Sem direção"]),
+    "num_pessoas": mesa.visualization.Slider("Número de bombeiros", 10, 0, 50, 1),
 }
 
 # Canvas para visualização
@@ -102,7 +104,7 @@ canvas_element = mesa.visualization.CanvasGrid(
 
 # Inicializando o servidor
 server = mesa.visualization.ModularServer(
-    ForestFire, [canvas_element, tree_chart, pie_chart], "Forest Fire with Cities and Evacuation", model_params
+    ForestFire, [canvas_element, tree_chart, pie_chart], "Forest Fire com Cidades e Pessoas", model_params
 )
 
 # Porta do servidor

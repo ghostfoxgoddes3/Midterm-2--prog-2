@@ -1,5 +1,5 @@
 import mesa
-from agent import TreeCell, CityCell, GrassCell, GroundFirefighter  # Importando as classes TreeCell, CityCell, GrassCell e Bombeiros
+from agent import TreeCell, CityCell, GrassCell, GroundFirefighter, AerialFirefighter  # Importando as classes TreeCell, CityCell, GrassCell e Bombeiros
 from model import ForestFire  # Importando o modelo de incêndio florestal 
 
 # Definindo as cores para as condições das células
@@ -25,7 +25,13 @@ def forest_fire_portrayal(cell):
 
     portrayal = {"Shape": None, "Filled": "true", "Layer": 0, "Color": "#000000"}
 
-    if isinstance(cell, GroundFirefighter):
+    if isinstance(cell, AerialFirefighter):
+        portrayal["Shape"] = "circle"
+        portrayal["r"] = 5
+        portrayal["Layer"] = 2  # Bombeiro em uma camada superior
+        portrayal["Color"] = COLORS["GroundFirefighter"]
+
+    elif isinstance(cell, GroundFirefighter):
         portrayal["Shape"] = "circle"
         portrayal["r"] = 0.8
         portrayal["Layer"] = 1  # Bombeiro em uma camada superior
@@ -94,7 +100,8 @@ model_params = {
     "grass_probability": mesa.visualization.Slider("Sobrevivência da grama", 0.5, 0.01, 1.0, 0.01),
     "prob_de_sobrevivencia": mesa.visualization.Slider("Resistência da árvore ao fogo", 0.5, 0.01, 1.0, 0.01),
     "vento": mesa.visualization.Choice("Direção do vento", value="Sem direção", choices=["Norte", "Sul", "Leste", "Oeste", "Sem direção"]),
-    "num_pessoas": mesa.visualization.Slider("Número de bombeiros", 10, 0, 50, 1),
+    "num_pessoas": mesa.visualization.Slider("Número de bombeiros terrestres", 10, 0, 50, 1),
+    "num_helicoptero": mesa.visualization.Slider("Número de helicopteros", 5, 0, 10, 1),
 }
 
 # Canvas para visualização

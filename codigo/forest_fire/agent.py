@@ -223,3 +223,87 @@ class GroundFirefighter(Person):
             tree.condition = "Fire Off"  # Apaga o fogo
             self.target_pos = None  # Reseta o alvo após apagar o fogo
 
+class AerialFirefighter(mesa.Agent):
+    """Representa um bombeiro aéreo que se move rapidamente e apaga o fogo na célula atual e vizinhas."""
+
+    def __init__(self, pos, model, velocidade=3):
+        """
+        Cria um bombeiro aéreo.
+        Args:
+            pos: Posição inicial do bombeiro.
+            model: Referência ao modelo.
+            velocidade: Velocidade de movimentação do bombeiro aéreo.
+        """
+        super().__init__(pos, model)
+        self.velocidade = velocidade  # Velocidade de movimentação
+        self.condition = "Aerial"          # Tipo do agente (bombeiro aéreo)
+
+    def apagar_fogo(self, pos):
+        """
+        Apaga o fogo na célula atual e nas vizinhas.
+        Args:
+            pos: Posição central para apagar o fogo.
+        """
+        # Obtém todas as células na vizinhança de Moore (8 vizinhos) + a posição atual
+        area_alvo = self.model.grid.get_neighborhood(pos, moore=True, include_center=True)
+        for cell in area_alvo:
+            cell_contents = self.model.grid.get_cell_list_contents([cell])
+            for agent in cell_contents:
+                if isinstance(agent, TreeCell) and agent.condition == "On Fire":
+                    agent.condition = "Fire Off"  # Apaga o fogo
+
+    def find_path_to_fire(self, start_pos):
+        """
+        Busca em largura (BFS) para encontrar o menor caminho até o fogo.
+        Args:
+            start_pos: Posição inicial do bombeiro.
+        Returns:
+            A posição de uma célula com fogo ou `None` se não houver fogo.
+        """
+        queue = deque([start_pos])  # Fila de posições a explorar
+        visited = set()            # Conjunto de posições visitadas
+
+        while queue:
+            current_pos = queue.popleft()
+            if current_pos in visited:
+                continue
+            visited.add(current_pos)
+
+            # Verifica os agentes na célula
+            cell_contents = self.model.grid.get_cell_list_contents([current_pos])
+            if any(isinstance(agent, TreeCell) and agent.condition == "On Fire" for agent in cell_contents):
+                return current_pos
+
+            # Adiciona vizinhos à fila
+            neighbors = self.model.grid.get_neighborhood(current_pos, moore=True, include_center=False)
+            queue.extend(neighbor for neighbor in neighbors if neighbor not in visited)
+
+        return None  # Retorna None se nenhum fogo for encontrado
+
+    def step(self):
+        """
+        Move o bombeiro em direção ao fogo e apaga-o, incluindo as células vizinhas.
+        """
+        # Atualiza ou encontra o caminho até o fogo
+        self.target_pos = self.find_path_to_fire(self.pos)
+
+        if self.target_pos:
+            x, y = self.pos
+            x_alvo, y_alvo = self.target_pos
+
+            # Calcula o deslocamento horizontal e vertical com base na velocidade
+            new_x = x + self.velocidade * (1 if x_alvo > x else -1 if x_alvo < x else 0)
+            new_y = y + self.velocidade * (1 if y_alvo > y else -1 if y_alvo < y else 0)
+            nova_pos = (new_x, new_y)
+
+            # Move o agente se a nova posição estiver dentro do grid
+            if not self.model.grid.out_of_bounds(nova_pos):
+                self.model.grid.move_agent(self, nova_pos)
+
+            # Se atingir o alvo, apaga o fogo
+            if nova_pos == self.target_pos:
+                self.apagar_fogo(nova_pos)
+                self.target_pos = None  # Reseta o alvo após apagar o fogo
+
+        # Apaga fogo na célula atual e vizinhas se não estiver em movimento
+        self.apagar_fogo(self.pos)

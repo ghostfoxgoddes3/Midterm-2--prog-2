@@ -1,10 +1,10 @@
 import mesa
 import math
-from agent import TreeCell, CityCell, GrassCell, Person, GroundFirefighter # Certifique-se de que GrassCell seja importado
+from agent import TreeCell, CityCell, GrassCell, Person, GroundFirefighter, AerialFirefighter # Certifique-se de que GrassCell seja importado
 
 
 class ForestFire(mesa.Model):
-    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.0, vento="Norte", city_probability=0.01, grass_probability=0.05, num_pessoas=10):
+    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.0, vento="Norte", city_probability=0.01, grass_probability=0.05, num_pessoas=10, num_helicoptero=5):
         super().__init__()
 
         self.schedule = mesa.time.RandomActivation(self)
@@ -47,6 +47,13 @@ class ForestFire(mesa.Model):
             new_person = GroundFirefighter((x, y), self)
             self.grid.place_agent(new_person, (x, y))
             self.schedule.add(new_person)
+
+        for _ in range(num_helicoptero):
+            x = self.random.randint(0, self.grid.height - 1)
+            y = self.random.randint(0, self.grid.height - 1)
+            new_helicoptero = AerialFirefighter((x, y), self)
+            self.grid.place_agent(new_helicoptero, (x, y))
+            self.schedule.add(new_helicoptero)
 
         self.running = True
         self.datacollector.collect(self)

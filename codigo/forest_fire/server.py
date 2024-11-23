@@ -1,17 +1,19 @@
 import mesa
-from agent import TreeCell, CityCell, GrassCell  # Importando as classes TreeCell, CityCell e GrassCell
+from agent import TreeCell, CityCell, GrassCell, GroundFirefighter  # Importando as classes TreeCell, CityCell, GrassCell e Bombeiros
 from model import ForestFire  # Importando o modelo de incêndio florestal 
 
 # Definindo as cores para as condições das células
 COLORS = {
-    "Fine": "#00AA00",        # Verde para árvores saudáveis
-    "On Fire": "#880000",     # Vermelho para árvores em chamas
-    "Burned Out": "#000000",  # Preto para árvores queimados
-    "City": "#0000FF",        # Azul para as cidades
+    "Fine": "#7eed24",        # Verde para árvores saudáveis
+    "On Fire": "#f7981b",     # Vermelho para árvores em chamas
+    "Burned Out": "#c9c7c9",  # Preto para árvores queimadas
+    "City": "#e877fc",        # Azul para as cidades
     "Evacuated": "#FFFF00",   # Amarelo para cidades em evacuação
-    "Grass Fine": "#7CFC00",  # Verde claro para gramas saudáveis
-    "Grass On Fire": "#FF4500",  # Laranja para gramas em chamas
-    "Grass Burned Out": "#4B4B4B",  # Cinza para gramas queimadas
+    "Grass Fine": "#c2fa93",  # Verde claro para gramas saudáveis
+    "Grass On Fire": "#f5a031",  # Laranja para gramas em chamas
+    "Grass Burned Out": "#a8a8a8",  # Cinza para gramas queimadas
+    "Fire Off": "#0000FF",    # Azul claro para árvore apagada pelo bombeiro
+    "GroundFirefighter": "#f70202"  # Rosa para o bombeiro
 }
 
 def forest_fire_portrayal(cell):
@@ -19,35 +21,51 @@ def forest_fire_portrayal(cell):
     Define como cada célula deve ser representada visualmente.
     """
     if cell is None:
-        return
+        return None
 
-    portrayal = {"Shape": "rect", "Filled": "true", "Layer": 0}
-    (x, y) = cell.pos
-    portrayal["x"] = x
-    portrayal["y"] = y
+    portrayal = {"Shape": None, "Filled": "true", "Layer": 0, "Color": "#000000"}
 
-    # Ajuste para o tamanho da célula dependendo da condição
-    if isinstance(cell, CityCell):  # Verificando se é uma cidade
-        portrayal["w"] = 5
-        portrayal["h"] = 5
-        portrayal["Color"] = COLORS[cell.condition] 
-    elif isinstance(cell, GrassCell):  # Verificando se é uma célula de grama
+    if isinstance(cell, GroundFirefighter):
+        portrayal["Shape"] = "circle"
+        portrayal["r"] = 0.8
+        portrayal["Layer"] = 1  # Bombeiro em uma camada superior
+        portrayal["Color"] = COLORS["GroundFirefighter"]
+
+    elif isinstance(cell, TreeCell):
+        portrayal["Shape"] = "rect"
         portrayal["w"] = 1
         portrayal["h"] = 1
+        portrayal["Color"] = COLORS[cell.condition]
+        portrayal["Layer"] = 0  # Árvore em camada inferior
+
+    elif isinstance(cell, CityCell):
+        portrayal["Shape"] = "rect"
+        portrayal["w"] = 5
+        portrayal["h"] = 5
+        portrayal["Color"] = COLORS[cell.condition]
+        portrayal["Layer"] = 0
+
+    elif isinstance(cell, GrassCell):
+        portrayal["Shape"] = "rect"
+        portrayal["w"] = 1
+        portrayal["h"] = 1
+        portrayal["Layer"] = 0
         if cell.condition == "Fine":
             portrayal["Color"] = COLORS["Grass Fine"]
         elif cell.condition == "On Fire":
             portrayal["Color"] = COLORS["Grass On Fire"]
         elif cell.condition == "Burned Out":
             portrayal["Color"] = COLORS["Grass Burned Out"]
-    else:  # Para as árvores
-        portrayal["w"] = 1
-        portrayal["h"] = 1
-        portrayal["Color"] = COLORS[cell.condition]
+
+    # Coordenadas da célula
+    (x, y) = cell.pos
+    portrayal["x"] = x
+    portrayal["y"] = y
 
     return portrayal
 
-# Gráfico de barras para mostrar as quantidades de árvores/mato em cada estado
+
+# Gráficos de estatísticas
 tree_chart = mesa.visualization.ChartModule(
     [
         {"Label": "Fine", "Color": COLORS["Fine"]},
@@ -56,7 +74,7 @@ tree_chart = mesa.visualization.ChartModule(
     ]
 )
 
-# Gráfico de pizza para a distribuição das árvores e mato
+# Gráfico de pizza para distribuição de árvores
 pie_chart = mesa.visualization.PieChartModule(
     [
         {"Label": "Fine", "Color": COLORS["Fine"]},
@@ -65,7 +83,7 @@ pie_chart = mesa.visualization.PieChartModule(
     ]
 )
 
-# Parâmetros do modelo: dimensões da grade, densidade das árvores e probabilidade das cidades
+# Parâmetros do modelo
 model_params = {
     "height": 100,
     "width": 100,
@@ -74,18 +92,19 @@ model_params = {
     "grass_probability": mesa.visualization.Slider("Grass Probability", 0.5, 0.01, 1.0, 0.01),
     "prob_de_sobrevivencia": mesa.visualization.Slider("Survival Probability", 0.5, 0.01, 1.0, 0.01),
     "vento": mesa.visualization.Choice("Wind Direction", value="Sem direção", choices=["Norte", "Sul", "Leste", "Oeste", "Sem direção"]),
+    "num_pessoas": mesa.visualization.Slider("Number of fire fighters", 10, 0, 50, 1),
 }
 
-# Definindo o Canvas para a visualização do modelo
+# Canvas para visualização
 canvas_element = mesa.visualization.CanvasGrid(
     forest_fire_portrayal, 100, 100, 500, 500
 )
 
-# Inicializando o servidor com o modelo, a visualização e os parâmetros
+# Inicializando o servidor
 server = mesa.visualization.ModularServer(
     ForestFire, [canvas_element, tree_chart, pie_chart], "Forest Fire with Cities and Evacuation", model_params
 )
 
-# Configurando a porta para o servidor
+# Porta do servidor
 server.port = 8521
 server.launch()

@@ -1,5 +1,7 @@
 import mesa
 import math
+import random
+from collections import deque
 
 
 class TreeCell(mesa.Agent):
@@ -133,3 +135,91 @@ class GrassCell(mesa.Agent):
                         if self.random.random() < 0.15:    #prob. arbitraria para queimar os vizinhos
                             neighbor.condition = "On Fire"
                 self.condition = "Burned Out"
+
+class Person(mesa.Agent):
+    """Classe base para as pessoas na simulação."""
+    def __init__(self, pos, model, resistencia_fogo=0, resistencia_fumaca=0.5):
+        super().__init__(pos, model)
+        self.pos = pos
+        self.condition = "Alive"
+        self.fire_resistance = resistencia_fogo
+        self.smoke_resistance = resistencia_fumaca
+
+    def step(self):
+        """Atualiza o estado da pessoa, verificando os perigos do fogo."""
+        if self.condition == "Alive":
+            current_cell = self.model.grid.get_cell_list_contents([self.pos])
+
+            # Verifica se a célula atual tem fogo
+            if any(agent.condition in ["On Fire", "Burned Out"] for agent in current_cell):
+                if self.random.random() > self.fire_resistance:
+                    self.condition = "Dead"
+                    return
+
+            # Verifica os vizinhos para risco de fumaça
+            for neighbor in self.model.grid.iter_neighbors(self.pos, moore=True):
+                if isinstance(neighbor, TreeCell) and neighbor.condition == "On Fire":
+                    if self.random.random() > self.smoke_resistance:
+                        self.condition = "Dead"
+                        break
+
+
+class GroundFirefighter(Person):
+    """Representa um bombeiro terrestre."""
+    def __init__(self, pos, model, resistencia_fogo=1, resistencia_fumaca=1):
+        super().__init__(pos, model, resistencia_fogo, resistencia_fumaca)
+
+    def find_path_to_fire(self, start_pos):
+        """Busca em largura (BFS) para encontrar o menor caminho até o fogo."""
+        queue = deque([start_pos])  # Fila de posições a explorar
+        visited = set()  # Conjunto de posições visitadas
+
+        while queue:
+            current_pos = queue.popleft()
+            if current_pos in visited:
+                continue
+            visited.add(current_pos)
+
+            # Verifica os agentes na célula
+            cell_contents = self.model.grid.get_cell_list_contents([current_pos])
+            if any(isinstance(agent, TreeCell) and agent.condition == "On Fire" for agent in cell_contents):
+                return current_pos
+
+            # Adiciona vizinhos à fila
+            neighbors = self.model.grid.get_neighborhood(current_pos, moore=True, include_center=False)
+            queue.extend(neighbor for neighbor in neighbors if neighbor not in visited)
+
+        return None  # Retorna None se nenhum fogo for encontrado
+
+    def step(self):
+        """Move o bombeiro em direção ao fogo e apaga-o se estiver na mesma célula."""
+        # Atualiza ou encontra o caminho até o fogo
+       
+        self.target_pos = self.find_path_to_fire(self.pos)
+
+        # Move-se passo a passo em direção ao alvo
+        if self.target_pos:
+            x, y = self.pos
+            x_ALVO, y_ALVO = self.target_pos
+
+            # Calcula o deslocamento horizontal e vertical
+            new_x = x + (1 if x_ALVO > x else -1 if x_ALVO < x else 0)
+            new_y = y + (1 if y_ALVO > y else -1 if y_ALVO < y else 0)
+            nova_pos = (new_x, new_y)
+
+            # Move o agente se a nova posição estiver dentro do grid
+            if not self.model.grid.out_of_bounds(nova_pos):
+                self.model.grid.move_agent(self, nova_pos)
+
+            # Se chegou no alvo, reseta o alvo
+            '''if nova_pos == self.target_pos:
+                self.target_pos = None'''
+
+        # Verifica e apaga o fogo na célula atual
+        current_cell = self.model.grid.get_cell_list_contents([self.pos])
+        tree = next((obj for obj in current_cell if isinstance(obj, TreeCell)), None)
+
+        if tree and tree.condition == "On Fire":
+            tree.condition = "Fire Off"  # Apaga o fogo
+            self.target_pos = None  # Reseta o alvo após apagar o fogo
+

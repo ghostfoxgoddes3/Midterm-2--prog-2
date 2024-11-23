@@ -4,14 +4,14 @@ from model import ForestFire  # Importando o modelo de incêndio florestal
 
 # Definindo as cores para as condições das células
 COLORS = {
-    "Fine": "#00AA00",        # Verde para árvores/mato saudáveis
-    "On Fire": "#880000",     # Vermelho para árvores/mato em chamas
-    "Burned Out": "#000000",  # Preto para árvores/mato queimados
+    "Fine": "#00AA00",        # Verde para árvores saudáveis
+    "On Fire": "#880000",     # Vermelho para árvores em chamas
+    "Burned Out": "#000000",  # Preto para árvores queimados
     "City": "#0000FF",        # Azul para as cidades
     "Evacuated": "#FFFF00",   # Amarelo para cidades em evacuação
-    "Grass Fine": "#7CFC00",  # Verde claro para células de grama saudáveis
-    "Grass On Fire": "#FF4500",  # Laranja para células de grama em chamas
-    "Grass Burned Out": "#4B4B4B",  # Cinza para células de grama queimadas
+    "Grass Fine": "#7CFC00",  # Verde claro para gramas saudáveis
+    "Grass On Fire": "#FF4500",  # Laranja para gramas em chamas
+    "Grass Burned Out": "#4B4B4B",  # Cinza para gramas queimadas
 }
 
 def forest_fire_portrayal(cell):

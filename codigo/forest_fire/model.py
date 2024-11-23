@@ -1,6 +1,6 @@
 import mesa
 import math
-from agente3 import TreeCell, CityCell, GrassCell  # Certifique-se de que GrassCell seja importado
+from agent import TreeCell, CityCell, GrassCell  # Certifique-se de que GrassCell seja importado
 
 
 class ForestFire(mesa.Model):

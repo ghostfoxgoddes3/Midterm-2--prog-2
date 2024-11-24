@@ -11,6 +11,7 @@ class ForestFire(mesa.Model):
         self.grid = mesa.space.MultiGrid(width, height, torus=False)
         self.prob_de_sobrevivencia = prob_de_sobrevivencia
         self.vento = vento
+        self.edge_reached = False.
 
         self.datacollector = mesa.DataCollector(
             {
@@ -21,6 +22,7 @@ class ForestFire(mesa.Model):
                 "Fire Off": lambda m: self.count_type(m, "Fire Off"),
                 "Bombed": lambda m: self.count_type(m, "Bombed"),
                 "Cut": lambda m: self.count_type(m, "Cut")
+                "BurnedFraction": lambda m: m.count_type(m, "Burned Out") / (m.grid.width * m.grid.height)
             }
         )
 
@@ -113,6 +115,15 @@ class ForestFire(mesa.Model):
         # Interrompe se não houver mais fogo
         if self.count_type(self, "On Fire") == 0:
             self.running = False
+            
+        if any(agent.condition in ["On Fire", "Burned Out"] and agent.pos[0] == self.grid.width - 1
+               for agent in self.schedule.agents if isinstance(agent, TreeCell)):
+            self.edge_reached = True
+
+        if self.count_type(self, "On Fire") == 0 or self.edge_reached:
+            self.running = False
+
+
 
     @staticmethod
     def count_type(model, condition):

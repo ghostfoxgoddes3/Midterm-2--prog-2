@@ -20,9 +20,9 @@ class ForestFire(mesa.Model):
                 "Cities Evacuated": lambda m: self.count_type(m, "Evacuated"),
                 "Fire Off": lambda m: self.count_type(m, "Fire Off"),
                 "Bombed": lambda m: self.count_type(m, "Bombed"),
-                "Cut": lambda m: self.count_type(m, "Cut")
+                "Cut": lambda m: self.count_type(m, "Cut"),
                 "BurnedFraction": lambda m: m.count_type(m, "Burned Out") / (m.grid.width * m.grid.height)
-            }
+                }
 
         # Criando agentes no grid
         for contents, (x, y) in self.grid.coord_iter():

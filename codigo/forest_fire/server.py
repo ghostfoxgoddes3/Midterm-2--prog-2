@@ -160,11 +160,11 @@ def forest_fire_portrayal(cell):
                 "h": 1,
         }
 
-        elif isinstance(cell, Chuva):
-            portrayal["Shape"] = "circle"
-            portrayal["r"] = 5
-            portrayal["Layer"] = 2
-            portrayal["Color"] = COLORS["Rain"]
+    elif isinstance(cell, Chuva):
+        portrayal["Shape"] = "circle"
+        portrayal["r"] = 5
+        portrayal["Layer"] = 2
+        portrayal["Color"] = COLORS["Rain"]
 
 
     # Coordenadas da célula

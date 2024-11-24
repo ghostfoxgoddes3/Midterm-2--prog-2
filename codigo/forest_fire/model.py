@@ -19,7 +19,8 @@ class ForestFire(mesa.Model):
                 "Burned Out": lambda m: self.count_type(m, "Burned Out"),
                 "Cities Evacuated": lambda m: self.count_type(m, "Evacuated"),
                 "Fire Off": lambda m: self.count_type(m, "Fire Off"),
-                "Toasted": lambda m: self.count_type(m, "Toasted")
+                "Bombed": lambda m: self.count_type(m, "Bombed"),
+                "Cut": lambda m: self.count_type(m, "Cut")
             }
         )
 

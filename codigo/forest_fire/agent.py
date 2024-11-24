@@ -628,3 +628,74 @@ class Chuva(Clima):
                             agent.condition = "Fine"
         else:
             pass
+
+class Citizen(Person):
+    """Represents a citizen living in cities, evacuating to the nearest safe city."""
+    def __init__(self, pos, model, resistencia_fogo=0, resistencia_fumaca=0.5):
+        super().__init__(pos, model, resistencia_fogo, resistencia_fumaca)
+        self.target_city = None  # Target city for evacuation
+        self.alive = True  # Track whether the citizen is alive
+
+    def find_nearest_safe_city(self, start_pos):
+        """
+        BFS to find the nearest non-evacuated city.
+        Args:
+            start_pos: Current position of the citizen.
+        Returns:
+            Position of the nearest non-evacuated city or None if none are available.
+        """
+        queue = deque([start_pos])  # Start from the current position
+        visited = set()
+
+        while queue:
+            current_pos = queue.popleft()
+            if current_pos in visited:
+                continue
+            visited.add(current_pos)
+
+            cell_contents = self.model.grid.get_cell_list_contents([current_pos])
+            for agent in cell_contents:
+                if isinstance(agent, CityCell) and agent.condition != "Evacuated":
+                    return agent.pos
+
+            neighbors = self.model.grid.get_neighborhood(current_pos, moore=True, include_center=False)
+            queue.extend(neighbor for neighbor in neighbors if neighbor not in visited)
+
+        return None  # No safe city found
+
+    def step(self):
+        """Evacuate if in a city that is evacuating and avoid fire."""
+        super().step()  # Retain any generic behavior from the Person class
+
+        if not self.alive:
+            return  # Stop action if already dead
+
+        # Check if in an evacuating city
+        current_cell = self.model.grid.get_cell_list_contents([self.pos])
+        in_evacuated_city = any(isinstance(agent, CityCell) and agent.condition == "Evacuated" for agent in current_cell)
+
+        if in_evacuated_city and self.target_city is None:
+            # Find the nearest safe city
+            self.target_city = self.find_nearest_safe_city(self.pos)
+
+        # Evacuate toward the target city
+        if self.target_city:
+            x, y = self.pos
+            target_x, target_y = self.target_city
+            new_x = x + (1 if target_x > x else -1 if target_x < x else 0)
+            new_y = y + (1 if target_y > y else -1 if target_y < y else 0)
+            new_pos = (new_x, new_y)
+
+            if not self.model.grid.out_of_bounds(new_pos):
+                self.model.grid.move_agent(self, new_pos)
+
+            # Clear the target city if reached
+            if new_pos == self.target_city:
+                self.target_city = None
+
+        # Check for death by fire
+        for agent in current_cell:
+            if isinstance(agent, TreeCell) and agent.condition in ["On Fire", "Burned Out"]:
+                self.alive = False
+                self.condition = "Dead"
+                break

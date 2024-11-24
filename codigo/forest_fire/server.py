@@ -1,5 +1,5 @@
 import mesa
-from agent import TreeCell, CityCell, GrassCell, GroundFirefighter, AerialFirefighter  # Importando as classes TreeCell, CityCell, GrassCell e Bombeiros
+from agent import TreeCell, CityCell, GrassCell, GroundFirefighter, AerialFirefighter, Police, Bomber, Logger  # Importando as classes TreeCell, CityCell, GrassCell e Bombeiros
 from model import ForestFire  # Importando o modelo de incêndio florestal 
 
 # Definindo as cores para as condições das células
@@ -13,7 +13,12 @@ COLORS = {
     "Grass On Fire": "#f5a031",  # Laranja para gramas em chamas
     "Grass Burned Out": "#a8a8a8",  # Cinza para gramas queimadas
     "Fire Off": "#0000FF",    # Azul claro para árvore apagada pelo bombeiro
-    "GroundFirefighter": "#f70202"  # Rosa para o bombeiro
+    "GroundFirefighter": "#f70202",  # Rosa para o bombeiro
+    "Police": "#0000FF",  # Azul para o policial
+    "Bomber": "#FF0000",  # Laranja para o Bombardeiro
+    "Toasted": "#000000", # Preto para a árvore bombardeada
+    "Logger": "#8B4513",  # Marrom para o Logger
+    "Blank": "#FFFFFF"    # Branco para a árvore cortada
 }
 
 def forest_fire_portrayal(cell):
@@ -62,6 +67,55 @@ def forest_fire_portrayal(cell):
             portrayal["Color"] = COLORS["Grass On Fire"]
         elif cell.condition == "Burned Out":
             portrayal["Color"] = COLORS["Grass Burned Out"]
+        
+        # Policial
+    if isinstance(cell, Police):
+        portrayal = {
+            "Shape": "circle",
+            "Filled": "true",
+            "Color": COLORS["Police"],
+            "Layer": 3,
+            "r": 2,  # Raio do círculo
+        }
+
+    # Bombardeiro
+    elif isinstance(cell, Bomber):
+        # Verifica se o Bombardeiro foi capturado e altera a cor para Roxo
+        if cell.captured:
+            portrayal = {
+                "Shape": "circle",
+                "Filled": "true",
+                "Color": "#A020F0",  # Roxo
+                "Layer": 3,
+                "r": 2,
+            }
+        else:
+            portrayal = {
+                "Shape": "circle",
+                "Filled": "true",
+                "Color": COLORS["Bomber"],
+                "Layer": 3,
+                "r": 2,
+            }
+     # Logger (Madeireiro)
+    elif isinstance(cell, Logger):
+        # Verifica se o Madeireiro foi capturado e altera a cor para Roxo
+        if cell.captured:
+            portrayal = {
+                "Shape": "circle",
+                "Filled": "true",
+                "Color": "#A020F0", 
+                "Layer": 3,
+                "r": 2,
+            }
+        else:
+            portrayal = {
+                "Shape": "circle",
+                "Filled": "true",
+                "Color": COLORS["Logger"],
+                "Layer": 3,
+                "r": 2,
+            }
 
     # Coordenadas da célula
     (x, y) = cell.pos
@@ -102,6 +156,9 @@ model_params = {
     "vento": mesa.visualization.Choice("Direção do vento", value="Sem direção", choices=["Norte", "Sul", "Leste", "Oeste", "Sem direção"]),
     "num_pessoas": mesa.visualization.Slider("Número de bombeiros terrestres", 10, 0, 50, 1),
     "num_helicoptero": mesa.visualization.Slider("Número de helicopteros", 5, 0, 10, 1),
+    "num_policiais": mesa.visualization.Slider("Número de Policiais", 5, 0, 20, 1),
+    "num_bombers": mesa.visualization.Slider("Número de Bombardeiros", 3, 0, 20, 1),
+    "num_loggers": mesa.visualization.Slider("Número de Madeireiros", 2, 0, 20, 1),
 }
 
 # Canvas para visualização

@@ -81,7 +81,6 @@ class TreeCell(mesa.Agent):
         x, y = pos
         return 0 <= x < self.model.grid.width and 0 <= y < self.model.grid.height
 
-
 class CityCell(mesa.Agent):
     """
     A cidade na floresta, com alerta de evacuação baseado no fogo.
@@ -162,7 +161,6 @@ class Person(mesa.Agent):
                     if self.random.random() > self.smoke_resistance:
                         self.condition = "Dead"
                         break
-
 
 class GroundFirefighter(Person):
     """Representa um bombeiro terrestre."""
@@ -307,6 +305,7 @@ class AerialFirefighter(mesa.Agent):
 
         # Apaga fogo na célula atual e vizinhas se não estiver em movimento
         self.apagar_fogo(self.pos)
+
 class Police(Person):
     """
     Representa o agente Police (Policial).
@@ -402,7 +401,6 @@ class Police(Person):
         x2, y2 = pos2
         return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
 
-
 class Bomber(Person):
     def __init__(self, pos, model, bomb_radius=3, speed=1, cooldown=5):
         super().__init__(pos, model)
@@ -441,7 +439,6 @@ class Bomber(Person):
         for tree in trees_in_radius:
             tree.condition = "Toasted"  # Marca as árvores como "Toasted" para indicar que foram bombardeadas
 
-
 class Logger(Person):
     def __init__(self, pos, model, cut_radius=2, cooldown=3):
         super().__init__(pos, model)
@@ -478,7 +475,6 @@ class Logger(Person):
         ]
         for tree in trees_in_radius:
             tree.condition = "Blank"  # Marca a árvore como cortada ou queimada
-
 
 class Clima(mesa.Agent): #classe que representa o tempo na região do modelo.
 

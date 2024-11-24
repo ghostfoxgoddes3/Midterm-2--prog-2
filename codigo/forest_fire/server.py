@@ -1,5 +1,5 @@
 import mesa
-from agent import TreeCell, CityCell, GrassCell, GroundFirefighter, AerialFirefighter, Police, Bomber, Logger  # Importando as classes TreeCell, CityCell, GrassCell e Bombeiros
+from agent import TreeCell, CityCell, GrassCell, GroundFirefighter, AerialFirefighter, Police, Bomber, Logger, Citizen  # Importando as classes TreeCell, CityCell, GrassCell e Bombeiros
 from model import ForestFire  # Importando o modelo de incêndio florestal 
 
 # Definindo as cores para as condições das células
@@ -117,24 +117,24 @@ def forest_fire_portrayal(cell):
                 "r": 2,
             }
 
-        elif isinstance(cell, Citizen):
-            if cell.alive:
-                portrayal = {
-                    "Shape": "circle",
-                    "Filled": "true",
-                    "Color": "#FF69B4",  # Pink for alive citizens
-                    "Layer": 3,
-                    "r": 1.0,
-                }
-            else:
-                portrayal = {
-                    "Shape": "rect",
-                    "Filled": "true",
-                    "Color": "#000000",  # Black for dead citizens
-                    "Layer": 3,
-                    "w": 1,
-                    "h": 1,
+    elif isinstance(cell, Citizen):
+        if cell.alive:
+            portrayal = {
+                "Shape": "circle",
+                "Filled": "true",
+                "Color": "#FF69B4",  # Pink for alive citizens
+                "Layer": 3,
+                "r": 1.0,
             }
+        else:
+            portrayal = {
+                "Shape": "rect",
+                "Filled": "true",
+                "Color": "#000000",  # Black for dead citizens
+                "Layer": 3,
+                "w": 1,
+                "h": 1,
+        }
 
 
     # Coordenadas da célula

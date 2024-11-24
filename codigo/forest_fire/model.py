@@ -58,6 +58,7 @@ class ForestFire(mesa.Model):
             new_helicoptero = AerialFirefighter((x, y), self)
             self.grid.place_agent(new_helicoptero, (x, y))
             self.schedule.add(new_helicoptero)
+            
         # Place police officers in the grid
         for _ in range(num_policiais):
             x = self.random.randint(0, self.grid.width - 1)

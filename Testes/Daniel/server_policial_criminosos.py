@@ -1,31 +1,75 @@
 import mesa
-from model import ForestFire, TreeCell, Police, Bomber, Logger
+from agent import TreeCell, CityCell, GrassCell, GroundFirefighter, AerialFirefighter, Police, Bomber, Logger  # Importando as classes TreeCell, CityCell, GrassCell e Bombeiros
+from model import ForestFire  # Importando o modelo de incêndio florestal 
 
-# Cores para os diferentes estados e agentes
+# Definindo as cores para as condições das células
 COLORS = {
-    "Fine": "#9bf587",  # Cor para árvores saudáveis
-    "On Fire": "#FF6666",  # Cor para árvores pegando fogo
-    "Burned Out": "#d4d6d5",  # Cor para árvores queimadas
-    "Fire Off": "#6495ED",  # Cor para árvore apagada pelo bombeiro
-    "Police": "#0000FF",  # Cor do policial
-    "Bomber": "#FF0000",  # Cor do Bombardeiro
-    "Toasted": "#000000", #Cor da Árvore bombardeada
-    "Logger": "#8B4513",  # Cor do Logger (Madeireiro)
-    "Blank": "#FFFFFF"
+    "Fine": "#7eed24",        # Verde para árvores saudáveis
+    "On Fire": "#f7981b",     # Vermelho para árvores em chamas
+    "Burned Out": "#c9c7c9",  # Preto para árvores queimadas
+    "City": "#e877fc",        # Azul para as cidades
+    "Evacuated": "#FFFF00",   # Amarelo para cidades em evacuação
+    "Grass Fine": "#c2fa93",  # Verde claro para gramas saudáveis
+    "Grass On Fire": "#f5a031",  # Laranja para gramas em chamas
+    "Grass Burned Out": "#a8a8a8",  # Cinza para gramas queimadas
+    "Fire Off": "#0000FF",    # Azul claro para árvore apagada pelo bombeiro
+    "GroundFirefighter": "#f70202",  # Rosa para o bombeiro
+    "Police": "#0000FF",  # Azul para o policial
+    "Bomber": "#FF0000",  # Laranja para o Bombardeiro
+    "Toasted": "#000000", # Preto para a árvore bombardeada
+    "Logger": "#8B4513",  # Marrom para o Logger
+    "Blank": "#FFFFFF"    # Branco para a árvore cortada
 }
 
-def forest_fire_portrayal(agent):
+def forest_fire_portrayal(cell):
     """
-    Função para exibir visualmente as árvores policiais e Bombardeiros.
+    Define como cada célula deve ser representada visualmente.
     """
-    if agent is None:
+    if cell is None:
         return None
 
-    portrayal = {}  # Inicializando o dicionário de visualização
+    portrayal = {"Shape": None, "Filled": "true", "Layer": 0, "Color": "#000000"}
 
+    if isinstance(cell, AerialFirefighter):
+        portrayal["Shape"] = "circle"
+        portrayal["r"] = 5
+        portrayal["Layer"] = 2  # Bombeiro em uma camada superior
+        portrayal["Color"] = COLORS["GroundFirefighter"]
 
-    # Policial
-    if isinstance(agent, Police):
+    elif isinstance(cell, GroundFirefighter):
+        portrayal["Shape"] = "circle"
+        portrayal["r"] = 0.8
+        portrayal["Layer"] = 1  # Bombeiro em uma camada superior
+        portrayal["Color"] = COLORS["GroundFirefighter"]
+
+    elif isinstance(cell, TreeCell):
+        portrayal["Shape"] = "rect"
+        portrayal["w"] = 1
+        portrayal["h"] = 1
+        portrayal["Color"] = COLORS[cell.condition]
+        portrayal["Layer"] = 0  # Árvore em camada inferior
+
+    elif isinstance(cell, CityCell):
+        portrayal["Shape"] = "rect"
+        portrayal["w"] = 5
+        portrayal["h"] = 5
+        portrayal["Color"] = COLORS[cell.condition]
+        portrayal["Layer"] = 0
+
+    elif isinstance(cell, GrassCell):
+        portrayal["Shape"] = "rect"
+        portrayal["w"] = 1
+        portrayal["h"] = 1
+        portrayal["Layer"] = 0
+        if cell.condition == "Fine":
+            portrayal["Color"] = COLORS["Grass Fine"]
+        elif cell.condition == "On Fire":
+            portrayal["Color"] = COLORS["Grass On Fire"]
+        elif cell.condition == "Burned Out":
+            portrayal["Color"] = COLORS["Grass Burned Out"]
+        
+        # Policial
+    if isinstance(cell, Police):
         portrayal = {
             "Shape": "circle",
             "Filled": "true",
@@ -35,9 +79,9 @@ def forest_fire_portrayal(agent):
         }
 
     # Bombardeiro
-    elif isinstance(agent, Bomber):
+    elif isinstance(cell, Bomber):
         # Verifica se o Bombardeiro foi capturado e altera a cor para Roxo
-        if agent.captured:
+        if cell.captured:
             portrayal = {
                 "Shape": "circle",
                 "Filled": "true",
@@ -54,9 +98,9 @@ def forest_fire_portrayal(agent):
                 "r": 2,
             }
      # Logger (Madeireiro)
-    elif isinstance(agent, Logger):
+    elif isinstance(cell, Logger):
         # Verifica se o Madeireiro foi capturado e altera a cor para Roxo
-        if agent.captured:
+        if cell.captured:
             portrayal = {
                 "Shape": "circle",
                 "Filled": "true",
@@ -72,30 +116,16 @@ def forest_fire_portrayal(agent):
                 "Layer": 3,
                 "r": 2,
             }
-    # Árvore
-    elif isinstance(agent, TreeCell):
-        portrayal = {
-            "Shape": "rect",
-            "Filled": "true",
-            "Color": COLORS[agent.condition],
-            "Layer": 0,
-            "w": 1,
-            "h": 1,
-        }
 
-    # Coordenadas no grid
-    x, y = agent.pos
+    # Coordenadas da célula
+    (x, y) = cell.pos
     portrayal["x"] = x
     portrayal["y"] = y
 
     return portrayal
 
-# Canvas para exibir o grid
-canvas_element = mesa.visualization.CanvasGrid(
-    forest_fire_portrayal, 100, 100, 500, 500
-)
 
-# Gráficos de barras
+# Gráficos de estatísticas
 tree_chart = mesa.visualization.ChartModule(
     [
         {"Label": "Fine", "Color": COLORS["Fine"]},
@@ -105,7 +135,7 @@ tree_chart = mesa.visualization.ChartModule(
     ]
 )
 
-# Gráficos de pizza
+# Gráfico de pizza para distribuição de árvores
 pie_chart = mesa.visualization.PieChartModule(
     [
         {"Label": "Fine", "Color": COLORS["Fine"]},
@@ -115,21 +145,32 @@ pie_chart = mesa.visualization.PieChartModule(
     ]
 )
 
-# Parâmetros do modelo configuráveis pelo usuário
+# Parâmetros do modelo
 model_params = {
     "height": 100,
     "width": 100,
-    "density": mesa.visualization.Slider("Tree density", 0.65, 0.01, 1.0, 0.01),
-    "prob_de_sobrevivencia": mesa.visualization.Slider("Probability of survival", 0.5, 0.0, 1.0, 0.01),
-    "num_policiais": mesa.visualization.Slider("Number of police officers", 5, 0, 20, 1),
-    "num_bombers": mesa.visualization.Slider("Number of Bombers", 3, 0, 20, 1),
-    "num_loggers": mesa.visualization.Slider("Number of loggers", 2, 0, 20, 1),
+    "density": mesa.visualization.Slider("Densidade de Árvore", 0.65, 0.01, 1.0, 0.01),
+    "city_probability": mesa.visualization.Slider("Densidade de Cidades", 0.01, 0.0001, 0.05, 0.0001),
+    "grass_probability": mesa.visualization.Slider("Sobrevivência da grama", 0.5, 0.01, 1.0, 0.01),
+    "prob_de_sobrevivencia": mesa.visualization.Slider("Resistência da árvore ao fogo", 0.5, 0.01, 1.0, 0.01),
+    "vento": mesa.visualization.Choice("Direção do vento", value="Sem direção", choices=["Norte", "Sul", "Leste", "Oeste", "Sem direção"]),
+    "num_pessoas": mesa.visualization.Slider("Número de bombeiros terrestres", 10, 0, 50, 1),
+    "num_helicoptero": mesa.visualization.Slider("Número de helicopteros", 5, 0, 10, 1),
+    "num_policiais": mesa.visualization.Slider("Número de Policiais", 5, 0, 20, 1),
+    "num_bombers": mesa.visualization.Slider("Número de Bombardeiros", 3, 0, 20, 1),
+    "num_loggers": mesa.visualization.Slider("Número de Madeireiros", 2, 0, 20, 1),
 }
+
+# Canvas para visualização
+canvas_element = mesa.visualization.CanvasGrid(
+    forest_fire_portrayal, 100, 100, 500, 500
+)
 
 # Inicializando o servidor
 server = mesa.visualization.ModularServer(
-    ForestFire, [canvas_element, tree_chart, pie_chart], "Forest Fire Simulation", model_params
+    ForestFire, [canvas_element, tree_chart, pie_chart], "Forest Fire com Cidades e Pessoas", model_params
 )
 
-server.port = 8521  # Porta do servidor
+# Porta do servidor
+server.port = 8521
 server.launch()

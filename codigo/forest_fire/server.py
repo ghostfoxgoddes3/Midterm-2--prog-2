@@ -16,9 +16,9 @@ COLORS = {
     "GroundFirefighter": "#f70202",  # Rosa para o bombeiro
     "Police": "#0000FF",  # Azul para o policial
     "Bomber": "#FF0000",  # Laranja para o Bombardeiro
-    "Toasted": "#000000", # Preto para a árvore bombardeada
+    "Bombed": "#000000", # Preto para a árvore bombardeada
     "Logger": "#8B4513",  # Marrom para o Logger
-    "Blank": "#FFFFFF"    # Branco para a árvore cortada
+    "Cut": "#FFFFFF"    # Branco para a árvore cortada
 }
 
 def forest_fire_portrayal(cell):
@@ -128,10 +128,12 @@ def forest_fire_portrayal(cell):
 # Gráficos de estatísticas
 tree_chart = mesa.visualization.ChartModule(
     [
-        {"Label": "Fine", "Color": COLORS["Fine"]},
-        {"Label": "On Fire", "Color": COLORS["On Fire"]},
-        {"Label": "Burned Out", "Color": COLORS["Burned Out"]},
-        {"Label": "Fire Off", "Color": COLORS["Fire Off"]},
+        {"Label": "Fine", "Color": COLORS["Fine"]},  # Árvores saudáveis
+        {"Label": "On Fire", "Color": COLORS["On Fire"]},  # Árvores em chamas
+        {"Label": "Burned Out", "Color": COLORS["Burned Out"]},  # Árvores queimadas
+        {"Label": "Fire Off", "Color": COLORS["Fire Off"]},  # Árvores apagadas pelos bombeiros
+        {"Label": "Bombed", "Color": COLORS["Bombed"]},  # Árvores bombardeadas
+        {"Label": "Cut", "Color": "#964B00" },  # Árvores cortadas
     ]
 )
 
@@ -142,9 +144,10 @@ pie_chart = mesa.visualization.PieChartModule(
         {"Label": "On Fire", "Color": COLORS["On Fire"]},
         {"Label": "Burned Out", "Color": COLORS["Burned Out"]},
         {"Label": "Fire Off", "Color": COLORS["Fire Off"]},
+        {"Label": "Bombed", "Color": COLORS["Bombed"]},
+        {"Label": "Cut", "Color": "#964B00"},
     ]
 )
-
 # Parâmetros do modelo
 model_params = {
     "height": 100,

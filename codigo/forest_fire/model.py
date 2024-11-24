@@ -1,6 +1,6 @@
 import mesa
 import math
-from agent import TreeCell, CityCell, GrassCell, Person, GroundFirefighter, AerialFirefighter, Police, Bomber, Logger # Certifique-se de que GrassCell seja importado
+from agent import TreeCell, CityCell, GrassCell, Person, GroundFirefighter, AerialFirefighter, Police, Bomber, Logger, Citizen # Certifique-se de que GrassCell seja importado
 
 
 class ForestFire(mesa.Model):
@@ -89,11 +89,11 @@ class ForestFire(mesa.Model):
         self.datacollector.collect(self)
 
         for contents, (x, y) in self.grid.coord_iter():
-        # Existing code for placing TreeCell, CityCell, GrassCell
-        if self.random.random() < city_probability:
-            city = CityCell((x, y), self)
-            self.grid.place_agent(city, (x, y))
-            self.schedule.add(city)
+            # Existing code for placing TreeCell, CityCell, GrassCell
+            if self.random.random() < city_probability:
+                city = CityCell((x, y), self)
+                self.grid.place_agent(city, (x, y))
+                self.schedule.add(city)
 
             # Place a Citizen in the city
             if self.random.random() < 0.2:  # 20% chance of a citizen in each city cell

@@ -1,6 +1,6 @@
 import mesa
 import math
-from agent import TreeCell, CityCell, GrassCell, Person, GroundFirefighter, AerialFirefighter, Police, Bomber, Logger, Citizen # Certifique-se de que GrassCell seja importado
+from agent import TreeCell, CityCell, GrassCell, Person, GroundFirefighter, AerialFirefighter, Police, Bomber, Logger, Citizen, qtd_chuva=5 # Certifique-se de que GrassCell seja importado
 
 
 class ForestFire(mesa.Model):
@@ -86,6 +86,13 @@ class ForestFire(mesa.Model):
             new_logger = Logger((x, y), self)
             self.grid.place_agent(new_logger, (x, y))
             self.schedule.add(new_logger)
+
+        for _ in range(qtd_chuva):
+            x = self.random.randint(0, self.grid.width - 1)
+            y = self.random.randint(0, self.grid.height - 1)
+            new_chuva = Chuva((x, y), self)
+            self.grid.place_agent(new_chuva, (x, y))
+            self.schedule.add(new_chuva)
 
         self.running = True
         self.datacollector.collect(self)

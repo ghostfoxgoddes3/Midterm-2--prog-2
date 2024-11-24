@@ -11,10 +11,9 @@ class ForestFire(mesa.Model):
         self.grid = mesa.space.MultiGrid(width, height, torus=False)
         self.prob_de_sobrevivencia = prob_de_sobrevivencia
         self.vento = vento
-        self.edge_reached = False.
+        self.edge_reached = False
 
-        self.datacollector = mesa.DataCollector(
-            {
+        self.datacollector = mesa.DataCollector{
                 "Fine": lambda m: self.count_type(m, "Fine"),
                 "On Fire": lambda m: self.count_type(m, "On Fire"),
                 "Burned Out": lambda m: self.count_type(m, "Burned Out"),
@@ -24,7 +23,6 @@ class ForestFire(mesa.Model):
                 "Cut": lambda m: self.count_type(m, "Cut")
                 "BurnedFraction": lambda m: m.count_type(m, "Burned Out") / (m.grid.width * m.grid.height)
             }
-        )
 
         # Criando agentes no grid
         for contents, (x, y) in self.grid.coord_iter():

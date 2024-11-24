@@ -18,7 +18,8 @@ COLORS = {
     "Bomber": "#FF0000",  # Laranja para o Bombardeiro
     "Bombed": "#000000", # Preto para a árvore bombardeada
     "Logger": "#8B4513",  # Marrom para o Logger
-    "Cut": "#FFFFFF"    # Branco para a árvore cortada
+    "Cut": "#FFFFFF",    # Branco para a árvore cortada
+    "Rain": "#2A9AD2",
     "Citizen Alive": "#FF69B4",  # Pink for alive citizens
     "Citizen Dead": "#000000",  # Black for dead citizens
 }
@@ -158,6 +159,12 @@ def forest_fire_portrayal(cell):
                 "w": 1,
                 "h": 1,
         }
+
+        elif isinstance(cell, Chuva):
+            portrayal["Shape"] = "circle"
+            portrayal["r"] = 5
+            portrayal["Layer"] = 2
+            portrayal["Color"] = COLORS["Rain"]
 
 
     # Coordenadas da célula

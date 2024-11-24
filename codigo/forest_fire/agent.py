@@ -583,11 +583,11 @@ class Clima(mesa.Agent): #classe que representa o tempo na região do modelo.
                     self.pressao = max(900, min(1050, self.pressao))
 
 class Chuva(Clima):
-    def __init__(self, intensidade, model, frequencia=0.4, temperatura_cidade=28.0, temperatura_media=26.0, umidade_media=80.0, pressao_media=1013.25, precipitacao_media=5.0):
-      super().__init__(model, temperatura_cidade, temperatura_media, umidade_media, pressao_media, precipitacao_media)
-      self.pos = None
+    def __init__(self, pos, model, intensidade = 0.5, frequencia=0.4, temperatura_cidade=28.0, temperatura_media=26.0, umidade_media=80.0, pressao_media=1013.25, precipitacao_media=5.0):
+      super().__init__(pos, model)
+      self.pos = pos
       self.intensidade = intensidade
-      self.frequencia = frequencia
+      self.frequencia = frequencia        
       self.condition = 'Chuva'
 
     def step(self):

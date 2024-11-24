@@ -437,7 +437,7 @@ class Bomber(Person):
             if isinstance(agent, TreeCell) and agent.condition == "Fine"
         ]
         for tree in trees_in_radius:
-            tree.condition = "Toasted"  # Marca as árvores como "Toasted" para indicar que foram bombardeadas
+            tree.condition = "Bombed"  # Marca as árvores como "Bombed" para indicar que foram bombardeadas
 
 class Logger(Person):
     def __init__(self, pos, model, cut_radius=2, cooldown=3):
@@ -474,7 +474,7 @@ class Logger(Person):
             if isinstance(agent, TreeCell) and agent.condition == "Fine"
         ]
         for tree in trees_in_radius:
-            tree.condition = "Blank"  # Marca a árvore como cortada ou queimada
+            tree.condition = "Cut"  # Marca a árvore como cortada.
 
 class Clima(mesa.Agent): #classe que representa o tempo na região do modelo.
 

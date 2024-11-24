@@ -592,7 +592,7 @@ class Chuva(Clima):
 
     def step(self):
         x, y = self.pos
-        new_pos = (x, y+1)
+        new_pos = (x, y)
 
         self.model.grid.move_agent(self, new_pos)
         if self.precipitacao > 0:

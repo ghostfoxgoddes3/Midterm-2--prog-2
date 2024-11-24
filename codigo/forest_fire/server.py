@@ -1,5 +1,5 @@
 import mesa
-from agent import TreeCell, CityCell, GrassCell, GroundFirefighter, AerialFirefighter, Police, Bomber, Logger, Citizen  # Importando as classes TreeCell, CityCell, GrassCell e Bombeiros
+from agent import TreeCell, CityCell, GrassCell, GroundFirefighter, AerialFirefighter, Police, Bomber, Logger, Citizen, Clima, Chuva  # Importando as classes TreeCell, CityCell, GrassCell e Bombeiros
 from model import ForestFire  # Importando o modelo de incêndio florestal 
 
 # Definindo as cores para as condições das células

@@ -1,46 +1,60 @@
 import mesa
-from agent import TreeCell, Police, Bomber, Logger
+import math
+from agent import TreeCell, CityCell, GrassCell, Person, GroundFirefighter, AerialFirefighter, Police, Bomber, Logger # Certifique-se de que GrassCell seja importado
+
 
 class ForestFire(mesa.Model):
-    """
-    Simple Forest Fire model.
-    """
-
-    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.5, num_policiais=5, num_bombers=3, num_loggers=3):
-        """
-        Create a new forest fire model.
-
-        Args:
-            width, height: The size of the grid to model
-            density: What fraction of grid cells have a tree in them.
-            prob_de_sobrevivencia: The probability that a tree survives fire.
-        """
+    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.0, vento="Norte", city_probability=0.01, grass_probability=0.05, num_pessoas=10, num_helicoptero=5, num_policiais=5, num_bombers=3, num_loggers=3):
         super().__init__()
-        # Set up model objects
-        self.schedule = mesa.time.RandomActivationByType(self)
+
+        self.schedule = mesa.time.RandomActivation(self)
         self.grid = mesa.space.MultiGrid(width, height, torus=False)
-        self.prob_de_sobrevivencia = prob_de_sobrevivencia  # Add survival probability
+        self.prob_de_sobrevivencia = prob_de_sobrevivencia
+        self.vento = vento
+
         self.datacollector = mesa.DataCollector(
             {
                 "Fine": lambda m: self.count_type(m, "Fine"),
                 "On Fire": lambda m: self.count_type(m, "On Fire"),
                 "Burned Out": lambda m: self.count_type(m, "Burned Out"),
+                "Cities Evacuated": lambda m: self.count_type(m, "Evacuated"),
                 "Fire Off": lambda m: self.count_type(m, "Fire Off"),
                 "Toasted": lambda m: self.count_type(m, "Toasted")
             }
         )
 
-        # Place a tree in each cell with Prob = density
+        # Criando agentes no grid
         for contents, (x, y) in self.grid.coord_iter():
             if self.random.random() < density:
-                # Create a tree
-                new_tree = TreeCell((x, y), self)
-                # Set all trees in the first column on fire.
-                if x == 0:
+                new_tree = TreeCell((x, y), self, self.prob_de_sobrevivencia)
+                if x == 0:  # Vamos começar o fogo na posição (0, y)
                     new_tree.condition = "On Fire"
                 self.grid.place_agent(new_tree, (x, y))
                 self.schedule.add(new_tree)
 
+            elif self.random.random() < city_probability:
+                city = CityCell((x, y), self)
+                self.grid.place_agent(city, (x, y))
+                self.schedule.add(city)
+            
+            elif self.random.random() < grass_probability:  
+                grass = GrassCell((x, y), self)
+                self.grid.place_agent(grass, (x, y))
+                self.schedule.add(grass)
+        
+        for _ in range(num_pessoas):
+            x = self.random.randint(0, self.grid.height - 1)
+            y = self.random.randint(0, self.grid.height - 1)
+            new_person = GroundFirefighter((x, y), self)
+            self.grid.place_agent(new_person, (x, y))
+            self.schedule.add(new_person)
+
+        for _ in range(num_helicoptero):
+            x = self.random.randint(0, self.grid.height - 1)
+            y = self.random.randint(0, self.grid.height - 1)
+            new_helicoptero = AerialFirefighter((x, y), self)
+            self.grid.place_agent(new_helicoptero, (x, y))
+            self.schedule.add(new_helicoptero)
         # Place police officers in the grid
         for _ in range(num_policiais):
             x = self.random.randint(0, self.grid.width - 1)
@@ -70,25 +84,29 @@ class ForestFire(mesa.Model):
             self.grid.place_agent(new_logger, (x, y))
             self.schedule.add(new_logger)
 
-    def step(self):  
-        """
-        Advance the model by one step.
-        """
-        self.schedule.step()
-        # Collect data for analysis
+        self.running = True
         self.datacollector.collect(self)
 
-        # If no trees are on fire, stop the simulation
+    def step(self):
+        """
+        Avança o modelo por um passo.
+        """
+        self.schedule.step()
+        # Coleta dados
+        self.datacollector.collect(self)
+
+        # Interrompe se não houver mais fogo
         if self.count_type(self, "On Fire") == 0:
             self.running = False
 
     @staticmethod
-    def count_type(model, tree_condition):
-        """
-        Helper method to count trees in a given condition in a given model.
-        """
+    def count_type(model, condition):
         count = 0
         for agent in model.schedule.agents:
-            if isinstance(agent, TreeCell) and agent.condition == tree_condition:
+            if isinstance(agent, TreeCell) and agent.condition == condition:
                 count += 1
+            elif isinstance(agent, CityCell) and agent.condition == condition:
+                count += 1
+            elif isinstance(agent,GrassCell) and agent.condition == condition:
+                count +=1
         return count

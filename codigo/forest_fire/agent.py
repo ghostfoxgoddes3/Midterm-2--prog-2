@@ -478,3 +478,157 @@ class Logger(Person):
         ]
         for tree in trees_in_radius:
             tree.condition = "Blank"  # Marca a árvore como cortada ou queimada
+
+
+class Clima(mesa.Agent): #classe que representa o tempo na região do modelo.
+
+    def __init__(self, pos, model, temperatura_media=26.0, umidade_media=80.0, pressao_media=1013.25, precipitacao_media=5.0):
+        """
+        Inicializa o clima com valores médios de temperatura, umidade, pressão e precipitação.
+
+        para temperatura_media: Temperatura média de uma floresta tropical em graus Celsius.
+        para umidade_media: Umidade relativa média de uma floresta tropical em percentual.
+        para pressao_media: Pressão atmosférica média de uma floresta tropical em hPa.
+        para precipitacao_media: Precipitação média diária de uma floresta tropical em mm.
+        """
+        super().__init__(pos, model)
+        self.pos = pos
+        self.temperatura = temperatura_media
+        self.umidade = umidade_media
+        self.pressao = pressao_media
+        self.precipitacao = precipitacao_media
+
+    def step(self):
+        if self.temperatura >= 30.0 and self.umidade >= 30.0 and self.precipitacao <= 10.0:
+            for agent in self.model.schedule.agents:
+                if isinstance(agent, TreeCell) and agent.condition == 'Fine':
+                    agent.condition = 'On Fire'
+
+    def verificar_fogo(model):
+        total_de_arvores = 0
+        arvores_queimando = 0
+
+        for agent in model.schedule.agents:
+            total_de_arvores += 1
+            if isinstance(agent, TreeCell):
+                if agent.condition == "On Fire":
+                    arvores_queimando += 1
+
+        if total_de_arvores > 0:
+            porcentagem = (arvores_queimando / total_de_arvores) * 100
+        else:
+            porcentagem = 0
+        return porcentagem
+
+    def verificar_queimadas(model):
+        total_de_arvores = 0
+        arvores_queimadas = 0
+
+        for agent in model.schedule.agents:
+            total_de_arvores += 1
+            if isinstance(agent, TreeCell):
+                if agent.condition == "Burned Out":
+                    arvores_queimadas += 1
+
+        if total_de_arvores > 0:
+            porcentagem = (arvores_queimadas / total_de_arvores) * 100
+        else:
+            porcentagem = 0
+        return porcentagem
+
+    def atualizar_clima(self, model):
+        '''
+        media da arvore queimando: 350 a 550
+        media da floresta queimando: 800 a 1200
+        media do lugar quando há incêndio: de 30 a 60
+        rescaldo (temperatura do chão e restos de queimada): 200 a 600
+        '''
+        porcentagem_fogo = self.verificar_fogo(model)
+        porcentagem_queimadas = self.verificar_queimadas(model)
+
+        self.precipitacao = random.uniform(0.0, 15.0) if random.random() < 0.40 else 0.0
+
+        if isinstance(self, TreeCell):
+            if self.condition == "Fine":
+                self.city_temp += random.uniform(-2.0, 2.0)
+
+                self.temperatura += random.uniform(-2.0, 2.0)
+
+                self.umidade += random.uniform(-5.0, 5.0)
+                self.umidade = max(0, min(100, self.umidade))
+
+                self.pressao += random.uniform(-5.0, 5.0)
+                self.pressao = max(900, min(1050, self.pressao))
+
+            if self.condition == "On Fire":
+                self.city_temp += (random.uniform(30.0, 60.0)*(porcentagem_fogo/100))
+                self.city_temp = min(max(self.city_temp, 30.0), 60.0)
+
+                self.temperatura += (random.uniform(800.0, 1200.0)*(porcentagem_fogo/100))
+
+                self.umidade -= (random.uniform(self.umidade/2,self.umidade))*(porcentagem_fogo/100)
+
+                if porcentagem_fogo >= 60:
+                    self.pressão -= (random.uniform(5, 20))*(porcentagem_fogo/100)
+                    self.pressao = max(900, min(1050, self.pressao))
+
+            if self.condition == "Burned Out":
+                if porcentagem_queimadas >= 60:
+                    self.city_temp += random.uniform(-1, 5)
+                    self.city_temp = min(max(self.city_temp, 28.0), 36.0)
+
+                    self.temperatura += random.uniform(200, 600)*(porcentagem_queimadas/100)
+                    self.temperatura = min(max(self.temperatura, 30.0), 37.0)
+
+                    self.umidade += random.uniform(-5.0, 5.0)
+                    self.umidade = max(0, min(80, self.umidade))
+
+                    self.pressao += random.uniform(-5.0, 5.0)
+                    self.pressao = max(900, min(1050, self.pressao))
+
+class Chuva(Clima):
+    def __init__(self, intensidade, model, frequencia=0.4, temperatura_cidade=28.0, temperatura_media=26.0, umidade_media=80.0, pressao_media=1013.25, precipitacao_media=5.0):
+      super().__init__(model, temperatura_cidade, temperatura_media, umidade_media, pressao_media, precipitacao_media)
+      self.pos = None
+      self.intensidade = intensidade
+      self.frequencia = frequencia
+
+    def step(self):
+        x, y = self.pos
+        self.pos = (x, y+1)
+
+        if self.precipitacao > 0:
+            if random.random() < self.frequencia:
+                self.precipitacao = self.intensidade
+                self.umidade = min(100, self.umidade + random.uniform(5.0, 15.0))
+                self.temperatura = max(20.0, self.temperatura - random.uniform(1.0, 3.0))
+                self.pressao += random.uniform(0.0, 5.0)
+            else:
+                self.precipitacao = 0.0
+                self.umidade = max(0, self.umidade - random.uniform(0.5, 1.5))
+                self.temperatura -= random.uniform(1.0, 3.0)
+                self.pressao -= random.uniform(0.0, 1.5)
+
+            for agent in self.model.schedule.agents:
+                if isinstance(agent, TreeCell):
+                    vizi_saudaveis = 0
+                    vizi_chamas = 0
+                    vizi_queimadas = 0
+
+                    if agent.condition == "On Fire" and self.precipitacao > 0:
+                        for neighbor in self.model.grid.get_neighbors(agent.pos, moore=True, include_center=False):
+                            if neighbor.condition == "Fine":
+                                vizi_saudaveis += 1
+                            elif neighbor.condition == "On Fire":
+                                vizi_chamas += 1
+                            else:
+                                vizi_queimadas += 1
+
+                        if vizi_chamas > 4:
+                            agent.condition = "Burned Out"
+                        if vizi_saudaveis > 4:
+                            agent.condition = "Fine"
+                        if vizi_queimadas > 4:
+                            agent.condition = "Fine"
+        else:
+            pass

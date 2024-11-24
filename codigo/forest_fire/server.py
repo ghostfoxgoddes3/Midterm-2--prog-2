@@ -117,6 +117,26 @@ def forest_fire_portrayal(cell):
                 "r": 2,
             }
 
+        elif isinstance(cell, Citizen):
+            if cell.alive:
+                portrayal = {
+                    "Shape": "circle",
+                    "Filled": "true",
+                    "Color": "#FF69B4",  # Pink for alive citizens
+                    "Layer": 3,
+                    "r": 1.0,
+                }
+            else:
+                portrayal = {
+                    "Shape": "rect",
+                    "Filled": "true",
+                    "Color": "#000000",  # Black for dead citizens
+                    "Layer": 3,
+                    "w": 1,
+                    "h": 1,
+            }
+
+
     # Coordenadas da célula
     (x, y) = cell.pos
     portrayal["x"] = x

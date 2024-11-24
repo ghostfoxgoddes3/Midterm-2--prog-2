@@ -1,10 +1,10 @@
 import mesa
 import math
-from agent import TreeCell, CityCell, GrassCell, Person, GroundFirefighter, AerialFirefighter # Certifique-se de que GrassCell seja importado
+from agent import TreeCell, CityCell, GrassCell, Person, GroundFirefighter, AerialFirefighter, Police, Bomber, Logger # Certifique-se de que GrassCell seja importado
 
 
 class ForestFire(mesa.Model):
-    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.0, vento="Norte", city_probability=0.01, grass_probability=0.05, num_pessoas=10, num_helicoptero=5):
+    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.0, vento="Norte", city_probability=0.01, grass_probability=0.05, num_pessoas=10, num_helicoptero=5, num_policiais=5, num_bombers=3, num_loggers=3):
         super().__init__()
 
         self.schedule = mesa.time.RandomActivation(self)
@@ -19,6 +19,7 @@ class ForestFire(mesa.Model):
                 "Burned Out": lambda m: self.count_type(m, "Burned Out"),
                 "Cities Evacuated": lambda m: self.count_type(m, "Evacuated"),
                 "Fire Off": lambda m: self.count_type(m, "Fire Off"),
+                "Toasted": lambda m: self.count_type(m, "Toasted")
             }
         )
 
@@ -54,6 +55,34 @@ class ForestFire(mesa.Model):
             new_helicoptero = AerialFirefighter((x, y), self)
             self.grid.place_agent(new_helicoptero, (x, y))
             self.schedule.add(new_helicoptero)
+        # Place police officers in the grid
+        for _ in range(num_policiais):
+            x = self.random.randint(0, self.grid.width - 1)
+            y = self.random.randint(0, self.grid.height - 1)
+            new_police = Police((x, y), self, range_view=3)
+            self.grid.place_agent(new_police, (x, y))
+            self.schedule.add(new_police)
+
+        # Place Bombers in the grid
+        for _ in range(num_bombers):
+            x = self.random.randint(0, self.grid.width - 1)
+            y = self.random.randint(0, self.grid.height - 1)
+            new_Bomber = Bomber(
+                (x, y), 
+                self, 
+                bomb_radius=2,  # Bombing radius
+                speed=1  
+            )
+            self.grid.place_agent(new_Bomber, (x, y))
+            self.schedule.add(new_Bomber)
+
+        # Place loggers in the grid
+        for _ in range(num_loggers):
+            x = self.random.randint(0, self.grid.width - 1)
+            y = self.random.randint(0, self.grid.height - 1)
+            new_logger = Logger((x, y), self)
+            self.grid.place_agent(new_logger, (x, y))
+            self.schedule.add(new_logger)
 
         self.running = True
         self.datacollector.collect(self)
@@ -81,5 +110,3 @@ class ForestFire(mesa.Model):
             elif isinstance(agent,GrassCell) and agent.condition == condition:
                 count +=1
         return count
-
-

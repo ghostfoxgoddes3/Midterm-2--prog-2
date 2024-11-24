@@ -588,11 +588,13 @@ class Chuva(Clima):
       self.pos = None
       self.intensidade = intensidade
       self.frequencia = frequencia
+      self.condition = 'Chuva'
 
     def step(self):
         x, y = self.pos
-        self.pos = (x, y+1)
+        new_pos = (x, y+1)
 
+        self.model.grid.move_agent(self, new_pos)
         if self.precipitacao > 0:
             if random.random() < self.frequencia:
                 self.precipitacao = self.intensidade

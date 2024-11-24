@@ -1,10 +1,10 @@
 import mesa
 import math
-from agent import TreeCell, CityCell, GrassCell, Person, GroundFirefighter, AerialFirefighter, Police, Bomber, Logger, Citizen, qtd_chuva=5 # Certifique-se de que GrassCell seja importado
+from agent import TreeCell, CityCell, GrassCell, Person, GroundFirefighter, AerialFirefighter, Police, Bomber, Logger, Citizen, Chuva, Clima # Certifique-se de que GrassCell seja importado
 
 
 class ForestFire(mesa.Model):
-    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.0, vento="Norte", city_probability=0.01, grass_probability=0.05, num_pessoas=10, num_helicoptero=5, num_policiais=5, num_bombers=3, num_loggers=3):
+    def __init__(self, width=100, height=100, density=0.65, prob_de_sobrevivencia=0.0, vento="Norte", city_probability=0.01, grass_probability=0.05, num_pessoas=10, num_helicoptero=5, num_policiais=5, num_bombers=3, num_loggers=3, qtd_chuva = 20):
         super().__init__()
 
         self.schedule = mesa.time.RandomActivation(self)

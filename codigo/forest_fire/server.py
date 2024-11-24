@@ -19,6 +19,8 @@ COLORS = {
     "Bombed": "#000000", # Preto para a árvore bombardeada
     "Logger": "#8B4513",  # Marrom para o Logger
     "Cut": "#FFFFFF"    # Branco para a árvore cortada
+    "Citizen Alive": "#FF69B4",  # Pink for alive citizens
+    "Citizen Dead": "#000000",  # Black for dead citizens
 }
 
 def forest_fire_portrayal(cell):
@@ -67,6 +69,27 @@ def forest_fire_portrayal(cell):
             portrayal["Color"] = COLORS["Grass On Fire"]
         elif cell.condition == "Burned Out":
             portrayal["Color"] = COLORS["Grass Burned Out"]
+
+    #citizen
+    elif isinstance(cell, Citizen):  
+        if cell.alive:
+            portrayal = {
+                "Shape": "circle",
+                "Filled": "true",
+                "Color": COLORS["Citizen Alive"],
+                "Layer": 3,
+                "r": 1.0,
+            }
+        else:
+            portrayal = {
+                "Shape": "rect",
+                "Filled": "true",
+                "Color": COLORS["Citizen Dead"],
+                "Layer": 3,
+                "w": 1,
+                "h": 1,
+            }
+        # ADDITION END
         
         # Policial
     if isinstance(cell, Police):

@@ -404,13 +404,12 @@ class Police(Person):
 
 
 class Bomber(Person):
-    def __init__(self, pos, model, bomb_radius=3, speed=3, cooldown=3):
+    def __init__(self, pos, model, bomb_radius=3, speed=1, cooldown=5):
         super().__init__(pos, model)
         self.bomb_radius = bomb_radius  # Raio do bombardeio
         self.speed = speed  # Velocidade do Bombardeiro
         self.cooldown = cooldown  # Cooldown em número de passos
         self.steps_until_next_bombard = 0  # Contador de cooldown
-        self.target_path = []  # Caminho até a próxima árvore saudável
         self.captured = False  # Marca o Bombardeiro como não capturado inicialmente
 
     def step(self):
@@ -421,63 +420,17 @@ class Bomber(Person):
         if self.steps_until_next_bombard > 0:
             self.steps_until_next_bombard -= 1
 
-        # Se não tem caminho, encontra um novo caminho até a árvore saudável mais próxima
-        if not self.target_path:
-            self.target_path = self.find_path_to_healthy_tree(self.pos)
-            if not self.target_path:
-                # Fallback: Movimento aleatório
-                neighbors = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False)
-                if neighbors:  # Certifique-se de que existem vizinhos
-                    random_move = random.choice(neighbors)
-                    self.model.grid.move_agent(self, random_move)
-                return
+        # Movimento aleatório
+        neighbors = self.model.grid.get_neighborhood(self.pos, moore=True, include_center=False)
+        if neighbors:
+            new_pos = random.choice(neighbors)
+            if not self.model.grid.out_of_bounds(new_pos):
+                self.model.grid.move_agent(self, new_pos)
 
-        # Se o caminho foi encontrado, move para o próximo passo
-        if self.target_path:
-            next_step = self.target_path.pop(0)
-            self.model.grid.move_agent(self, next_step)
-
-        # Realiza o bombardeio se o cooldown permitir
+        # Bombardeia árvores se o cooldown permitir
         if self.steps_until_next_bombard == 0:
             self.bombard_trees()
-            self.steps_until_next_bombard = self.cooldown
-
-    def find_path_to_healthy_tree(self, start_pos):
-        """
-        Busca em largura (BFS) para encontrar o menor caminho até uma árvore saudável.
-        Permite passar por qualquer célula no grid, independentemente do conteúdo.
-        """
-        queue = deque([(start_pos, [])])  # Fila de posições a serem exploradas e o caminho até elas
-        visited = set()  # Conjunto de posições visitadas
-
-        while queue:
-            current_pos, path = queue.popleft()
-
-            # Evita revisitar células
-            if current_pos in visited:
-                continue
-            visited.add(current_pos)
-
-            # Verifica se há uma árvore saudável na célula atual
-            current_cell = self.model.grid.get_cell_list_contents(current_pos)
-            tree = next((obj for obj in current_cell if isinstance(obj, TreeCell) and obj.condition == "Fine"), None)
-
-            if tree:  # Se encontrar uma árvore saudável
-                return path + [current_pos]  # Retorna o caminho até a árvore saudável
-
-            # Explora todos os vizinhos, permitindo atravessar qualquer célula
-            neighbors = self.model.grid.get_neighborhood(current_pos, moore=False, include_center=False)
-            for neighbor in neighbors:
-                if neighbor not in visited:
-                    queue.append((neighbor, path + [current_pos]))
-
-        return []  # Retorna caminho vazio se não encontrar árvore saudável
-
-    def choose_random_path(self):
-        """Escolhe um caminho aleatório entre as células vizinhas."""
-        neighbors = self.model.grid.get_neighborhood(self.pos, moore=True, include_center=False)
-        random.shuffle(neighbors)  # Embaralha as células vizinhas para garantir aleatoriedade
-        return neighbors  # Retorna as células vizinhas para o movimento aleatório
+            self.steps_until_next_bombard = self.cooldown  # Reseta o cooldown após bombardeio
 
     def bombard_trees(self):
         """Bombardeia as árvores dentro do raio de ação."""
@@ -488,57 +441,31 @@ class Bomber(Person):
         for tree in trees_in_radius:
             tree.condition = "Toasted"  # Marca as árvores como "Toasted" para indicar que foram bombardeadas
 
-class Logger(Person):
-    """
-    Representa o agente Logger (Madeireiro).
-    O Logger pode cortar árvores ao seu redor dentro de um raio especificado.
-    """
-    def __init__(self, pos, model, cut_radius=2, cooldown=3):
-        """
-        Inicializa o Logger.
 
-        Args:
-            pos: Posição inicial do Logger no grid.
-            model: Instância do modelo.
-            cut_radius: Raio dentro do qual o Logger pode cortar as árvores.
-            cooldown: Número de passos antes de poder cortar novamente.
-        """
+class Logger(Person):
+    def __init__(self, pos, model, cut_radius=2, cooldown=3):
         super().__init__(pos, model)
         self.cut_radius = cut_radius  # Raio de corte de árvores
-        self.captured = False  # Se o logger for capturado (pela polícia)
-        self.target_path = []  # Caminho até a próxima árvore saudável
+        self.captured = False  # Se o Logger foi capturado (pela polícia)
         self.cooldown = cooldown  # Número de passos entre cortes
         self.steps_until_next_cut = 0  # Contador de cooldown
 
     def step(self):
-        """
-        Executa a ação do Logger em cada passo.
-        O Logger corta as árvores dentro do seu raio de ação.
-        """
         if self.captured:
-            return  # Se o Logger for capturado, ele não realiza mais ações.
+            return  # Se o Logger foi capturado, ele não realiza mais ações.
 
         # Decrementa o cooldown
         if self.steps_until_next_cut > 0:
             self.steps_until_next_cut -= 1
 
-        # Se não tem caminho, encontra um novo caminho até a árvore saudável mais próxima
-        if not self.target_path:
-            self.target_path = self.find_path_to_healthy_tree(self.pos)
-            if not self.target_path:
-                # Fallback: Movimento aleatório
-                neighbors = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False)
-                if neighbors:  # Certifique-se de que existem vizinhos
-                    random_move = random.choice(neighbors)
-                    self.model.grid.move_agent(self, random_move)
-                return
+        # Movimento aleatório
+        neighbors = self.model.grid.get_neighborhood(self.pos, moore=True, include_center=False)
+        if neighbors:
+            new_pos = random.choice(neighbors)
+            if not self.model.grid.out_of_bounds(new_pos):
+                self.model.grid.move_agent(self, new_pos)
 
-        # Move para o próximo passo no caminho
-        if self.target_path:
-            next_step = self.target_path.pop(0)
-            self.model.grid.move_agent(self, next_step)
-
-        # Tenta cortar árvores se o cooldown permitir
+        # Corta árvores se o cooldown permitir
         if self.steps_until_next_cut == 0:
             self.cut_trees()
             self.steps_until_next_cut = self.cooldown  # Reseta o cooldown após cortar
@@ -551,34 +478,3 @@ class Logger(Person):
         ]
         for tree in trees_in_radius:
             tree.condition = "Blank"  # Marca a árvore como cortada ou queimada
-
-    def find_path_to_healthy_tree(self, start_pos):
-        """
-        Busca em largura (BFS) para encontrar o menor caminho até uma árvore saudável.
-        Permite passar por qualquer célula no grid, independentemente do conteúdo.
-        """
-        queue = deque([(start_pos, [])])  # Fila de posições a serem exploradas e o caminho até elas
-        visited = set()  # Conjunto de posições visitadas
-
-        while queue:
-            current_pos, path = queue.popleft()
-
-            # Evita revisitar células
-            if current_pos in visited:
-                continue
-            visited.add(current_pos)
-
-            # Verifica se há uma árvore saudável na célula atual
-            current_cell = self.model.grid.get_cell_list_contents(current_pos)
-            tree = next((obj for obj in current_cell if isinstance(obj, TreeCell) and obj.condition == "Fine"), None)
-
-            if tree:  # Se encontrar uma árvore saudável
-                return path + [current_pos]  # Retorna o caminho até a árvore saudável
-
-            # Explora todos os vizinhos, permitindo atravessar qualquer célula
-            neighbors = self.model.grid.get_neighborhood(current_pos, moore=False, include_center=False)
-            for neighbor in neighbors:
-                if neighbor not in visited:
-                    queue.append((neighbor, path + [current_pos]))
-
-        return []  # Retorna caminho vazio se não encontrar árvore saudável

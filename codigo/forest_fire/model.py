@@ -105,12 +105,7 @@ class ForestFire(mesa.Model):
                 self.grid.place_agent(city, (x, y))
                 self.schedule.add(city)
 
-            # Place a Citizen in the city
-            if self.random.random() < 0.02:  # 20% chance of a citizen in each city cell
-                citizen = Citizen((x, y), self)
-                self.grid.place_agent(citizen, (x, y))
-                self.schedule.add(citizen)
-
+           w
 
     def step(self):
         """

@@ -205,7 +205,7 @@ model_params = {
     "density": mesa.visualization.Slider("Densidade de Árvore", 0.65, 0.01, 1.0, 0.01),
     "city_probability": mesa.visualization.Slider("Densidade de Cidades", 0.01, 0.0001, 0.05, 0.0001),
     "grass_probability": mesa.visualization.Slider("Sobrevivência da grama", 0.5, 0.01, 1.0, 0.01),
-    "prob_de_sobrevivencia": mesa.visualization.Slider("Resistência da árvore ao fogo", 0.5, 0.01, 1.0, 0.01),
+    "prob_de_sobrevivencia": mesa.visualization.Slider("Resistência da árvore ao fogo", 0.5, 0.00, 1.0, 0.01),
     "vento": mesa.visualization.Choice("Direção do vento", value="Sem direção", choices=["Norte", "Sul", "Leste", "Oeste", "Sem direção"]),
     "num_pessoas": mesa.visualization.Slider("Número de bombeiros terrestres", 10, 0, 50, 1),
     "num_helicoptero": mesa.visualization.Slider("Número de helicopteros", 5, 0, 10, 1),

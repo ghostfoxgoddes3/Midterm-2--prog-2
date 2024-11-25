@@ -622,11 +622,11 @@ class Chuva(Clima):
                             else:
                                 vizi_queimadas += 1
 
-                        if vizi_chamas > 8:
+                        if vizi_chamas > 4:
                             agent.condition = "Burned Out"
-                        if vizi_saudaveis > 1:
+                        if vizi_saudaveis > 4:
                             agent.condition = "Fine"
-                        if vizi_queimadas > 1:
+                        if vizi_queimadas > 4:
                             agent.condition = "Fine"
         else:
             pass

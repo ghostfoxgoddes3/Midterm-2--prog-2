@@ -105,8 +105,6 @@ class ForestFire(mesa.Model):
                 self.grid.place_agent(city, (x, y))
                 self.schedule.add(city)
 
-           w
-
     def step(self):
         """
         Avança o modelo por um passo.
